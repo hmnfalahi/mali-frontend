@@ -79,12 +79,6 @@ function App() {
               </ProtectedRoute>
             } />
 
-            <Route path="/financing-methods" element={
-              <ProtectedRoute>
-                <LayoutWrapper><div className="p-8">Financing Methods Page Placeholder</div></LayoutWrapper>
-              </ProtectedRoute>
-            } />
-
             <Route path="/my-requests" element={
               <ProtectedRoute>
                 <LayoutWrapper><div className="p-8">My Requests Page Placeholder</div></LayoutWrapper>

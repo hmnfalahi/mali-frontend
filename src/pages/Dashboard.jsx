@@ -14,9 +14,10 @@ import {
     ArrowLeft,
     Sparkles,
     CreditCard,
-    AlertCircle
+    AlertCircle,
+    Plus
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -31,23 +32,19 @@ const statusConfig = {
 };
 
 export default function Dashboard() {
-    const { user } = useAuth(); // Use AuthContext
-    const { data: userData } = useQuery({
-        // Optional: Fetch fresh user data if needed, but context user should suffice for display
-        queryKey: ["me"],
-        initialData: user
-    });
-
+    const { user } = useAuth();
+    
+    // Fetch Company Data
     const { data: company, isLoading: companyLoading } = useQuery({
-        queryKey: ["company", user?.phone_number], // Use phone_number as identifier
+        queryKey: ["company", user?.phone_number],
         queryFn: async () => {
-            // Assuming API will support filtering by current user implicitly or we pass identifier
             const companies = await apiService.entities.Company.filter({ created_by: user.phone_number });
             return companies[0] || null;
         },
         enabled: !!user,
     });
 
+    // Fetch Requests
     const { data: requests = [], isLoading: requestsLoading } = useQuery({
         queryKey: ["requests", user?.phone_number],
         queryFn: async () => {
@@ -61,6 +58,12 @@ export default function Dashboard() {
         queryFn: () => apiService.entities.FinancingMethod.filter({ is_active: true }),
     });
 
+    // Determine Active Request (Most recent one that is not Rejected/Approved if we want to be strict, or just the latest one)
+    // Based on user query "we allow only 1 active request", we assume the top one is the active one if exists.
+    // If the latest one is rejected/approved, then maybe there is no active request.
+    const activeRequest = requests.length > 0 ? requests[0] : null;
+    const isActive = activeRequest && activeRequest.status !== "رد شده" && activeRequest.status !== "تأیید شده";
+
     if (!user) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
@@ -68,30 +71,6 @@ export default function Dashboard() {
             </div>
         );
     }
-
-    const stats = [
-        {
-            title: "درخواست‌های فعال",
-            value: requests.filter(r => r.status !== "تأیید شده" && r.status !== "رد شده").length,
-            icon: FileText,
-            color: "from-blue-500 to-blue-600",
-            bgColor: "bg-blue-50",
-        },
-        {
-            title: "تأیید شده",
-            value: requests.filter(r => r.status === "تأیید شده").length,
-            icon: CheckCircle2,
-            color: "from-emerald-500 to-emerald-600",
-            bgColor: "bg-emerald-50",
-        },
-        {
-            title: "در انتظار بررسی",
-            value: requests.filter(r => r.status === "در انتظار بررسی").length,
-            icon: Clock,
-            color: "from-amber-500 to-amber-600",
-            bgColor: "bg-amber-50",
-        },
-    ];
 
     return (
         <div className="space-y-8">
@@ -113,94 +92,90 @@ export default function Dashboard() {
                         سلام، {user.first_name || "کاربر"} {user.last_name || ""}
                     </h1>
                     <p className="text-blue-200 text-sm md:text-base max-w-xl">
-                        به پلتفرم هوشمند تأمین مالی و خدمات مالی خوش آمدید. از اینجا می‌توانید اطلاعات شرکت خود را ثبت کرده و درخواست تأمین مالی دهید.
+                        پنل مدیریت تأمین مالی شرکت شما
                     </p>
                 </div>
             </motion.div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {stats.map((stat, index) => {
-                    const Icon = stat.icon;
-                    return (
-                        <motion.div
-                            key={stat.title}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: index * 0.1 }}
-                        >
-                            <Card className="border-0 shadow-lg shadow-slate-200/50 hover:shadow-xl transition-shadow">
-                                <CardContent className="p-6">
-                                    <div className="flex items-center justify-between">
-                                        <div>
-                                            <p className="text-sm text-slate-500 mb-1">{stat.title}</p>
-                                            {requestsLoading ? (
-                                                <Skeleton className="h-8 w-16" />
-                                            ) : (
-                                                <p className="text-3xl font-bold text-slate-800">{stat.value}</p>
-                                            )}
-                                        </div>
-                                        <div className={`w-14 h-14 rounded-2xl ${stat.bgColor} flex items-center justify-center`}>
-                                            <Icon className={`w-7 h-7 bg-gradient-to-br ${stat.color} bg-clip-text text-transparent`} style={{ color: stat.color.includes('blue') ? '#3b82f6' : stat.color.includes('emerald') ? '#10b981' : '#f59e0b' }} />
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </motion.div>
-                    );
-                })}
-            </div>
-
-            {/* Company Status & Quick Actions */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Company Status */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Company Information Card - Takes up 2 columns on large screens */}
                 <motion.div
+                    className="lg:col-span-2"
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.3 }}
+                    transition={{ delay: 0.1 }}
                 >
-                    <Card className="border-0 shadow-lg shadow-slate-200/50 h-full">
-                        <CardHeader className="pb-4">
-                            <CardTitle className="flex items-center gap-3 text-lg">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8a] flex items-center justify-center">
-                                    <Building2 className="w-5 h-5 text-white" />
-                                </div>
-                                وضعیت شرکت
-                            </CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            {companyLoading ? (
-                                <div className="space-y-4">
-                                    <Skeleton className="h-4 w-full" />
-                                    <Skeleton className="h-4 w-3/4" />
-                                </div>
-                            ) : company ? (
-                                <div className="space-y-4">
-                                    <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50">
-                                        <div>
-                                            <p className="font-semibold text-slate-800">{company.title}</p>
-                                            <p className="text-sm text-slate-500 mt-1">{company.activity_subject || "موضوع فعالیت ثبت نشده"}</p>
-                                        </div>
-                                        <Badge className={company.title ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}>
-                                            {company.title ? "اطلاعات ثبت شده" : "در حال تکمیل"}
-                                        </Badge>
+                    <Card className="border-0 shadow-lg shadow-slate-200/50 h-full overflow-hidden">
+                        <CardHeader className="bg-slate-50/50 border-b border-slate-100">
+                            <div className="flex items-center justify-between">
+                                <CardTitle className="flex items-center gap-3 text-lg text-[#1e3a5f]">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8a] flex items-center justify-center">
+                                        <Building2 className="w-5 h-5 text-white" />
                                     </div>
+                                    اطلاعات شرکت
+                                </CardTitle>
+                                {company && (
                                     <Link to={createPageUrl("CompanyProfile")}>
-                                        <Button variant="outline" className="w-full group">
-                                            ویرایش اطلاعات شرکت
-                                            <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+                                        <Button variant="outline" size="sm" className="h-8">
+                                            ویرایش
+                                            <ArrowLeft className="w-3 h-3 mr-1" />
                                         </Button>
                                     </Link>
+                                )}
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-6">
+                            {companyLoading ? (
+                                <div className="space-y-4">
+                                    <Skeleton className="h-4 w-1/3" />
+                                    <Skeleton className="h-20 w-full" />
+                                    <Skeleton className="h-4 w-1/2" />
+                                </div>
+                            ) : company ? (
+                                <div className="space-y-6">
+                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                        <div>
+                                            <h2 className="text-xl font-bold text-slate-800">{company.title}</h2>
+                                            <p className="text-slate-500 mt-1">{company.activity_subject}</p>
+                                        </div>
+                                        <Badge variant="outline" className="w-fit bg-emerald-50 text-emerald-700 border-emerald-200 px-3 py-1">
+                                            {company.title ? "اطلاعات کامل" : "نقص اطلاعات"}
+                                        </Badge>
+                                    </div>
+                                    
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+                                        <div>
+                                            <p className="text-xs text-slate-400 mb-1">سرمایه ثبت شده</p>
+                                            <p className="font-medium text-slate-700">
+                                                {company.registered_capital ? new Intl.NumberFormat("fa-IR").format(company.registered_capital) : "-"} <span className="text-xs text-slate-400">ریال</span>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-slate-400 mb-1">شناسه ملی</p>
+                                            <p className="font-medium text-slate-700 font-mono tracking-wider">{company.national_id || "-"}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-slate-400 mb-1">سود خالص (آخرین دوره)</p>
+                                            <p className="font-medium text-slate-700">
+                                                {company.latest_net_profit ? new Intl.NumberFormat("fa-IR").format(company.latest_net_profit) : "-"} <span className="text-xs text-slate-400">ریال</span>
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <p className="text-xs text-slate-400 mb-1">تعداد پرسنل</p>
+                                            <p className="font-medium text-slate-700">{company.personnel_count || "-"}</p>
+                                        </div>
+                                    </div>
                                 </div>
                             ) : (
-                                <div className="text-center py-8">
+                                <div className="text-center py-12">
                                     <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
                                         <Building2 className="w-8 h-8 text-slate-400" />
                                     </div>
-                                    <p className="text-slate-600 mb-4">هنوز اطلاعات شرکتی ثبت نکرده‌اید</p>
+                                    <h3 className="text-lg font-medium text-slate-800 mb-2">هنوز شرکتی ثبت نکرده‌اید</h3>
+                                    <p className="text-slate-500 mb-6 max-w-sm mx-auto">برای دسترسی به خدمات تأمین مالی، ابتدا باید اطلاعات شرکت خود را تکمیل کنید.</p>
                                     <Link to={createPageUrl("CompanyProfile")}>
-                                        <Button className="bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] hover:opacity-90">
-                                            ثبت اطلاعات شرکت
+                                        <Button className="bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a]">
+                                            ثبت شرکت جدید
                                             <ArrowLeft className="w-4 h-4 mr-2" />
                                         </Button>
                                     </Link>
@@ -210,114 +185,123 @@ export default function Dashboard() {
                     </Card>
                 </motion.div>
 
-                {/* Quick Actions */}
+                {/* Active Request Card */}
                 <motion.div
+                    className="lg:col-span-1"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.4 }}
+                    transition={{ delay: 0.2 }}
                 >
-                    <Card className="border-0 shadow-lg shadow-slate-200/50 h-full">
-                        <CardHeader className="pb-4">
-                            <CardTitle className="flex items-center gap-3 text-lg">
-                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#d4af37] to-[#e8c963] flex items-center justify-center">
-                                    <CreditCard className="w-5 h-5 text-white" />
+                    <Card className="border-0 shadow-lg shadow-slate-200/50 h-full flex flex-col">
+                        <CardHeader className={`border-b ${isActive ? 'bg-blue-50/50 border-blue-100' : 'bg-slate-50/50 border-slate-100'}`}>
+                            <CardTitle className="flex items-center gap-3 text-lg text-[#1e3a5f]">
+                                <div className={`w-10 h-10 rounded-xl ${isActive ? 'bg-blue-100' : 'bg-slate-200'} flex items-center justify-center`}>
+                                    <FileText className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
                                 </div>
-                                دسترسی سریع
+                                درخواست جاری
                             </CardTitle>
                         </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 gap-3">
-                                <Link to={createPageUrl("FinancingMethods")}>
-                                    <div className="p-4 rounded-xl border border-slate-200 hover:border-[#1e3a5f]/30 hover:bg-slate-50 transition-all cursor-pointer group">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                                                    <CreditCard className="w-5 h-5 text-blue-600" />
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium text-slate-800">روش‌های تأمین مالی</p>
-                                                    <p className="text-xs text-slate-500">{methods.length} روش فعال</p>
-                                                </div>
+                        <CardContent className="p-6 flex-1 flex flex-col justify-center">
+                            {requestsLoading ? (
+                                <div className="space-y-4">
+                                    <Skeleton className="h-4 w-full" />
+                                    <Skeleton className="h-20 w-full" />
+                                </div>
+                            ) : activeRequest ? (
+                                <div className="space-y-6">
+                                    <div>
+                                        <div className="flex justify-between items-start mb-2">
+                                            <p className="text-sm text-slate-500">وضعیت درخواست</p>
+                                            <Badge className={statusConfig[activeRequest.status]?.color || "bg-slate-100 text-slate-700"}>
+                                                {activeRequest.status}
+                                            </Badge>
+                                        </div>
+                                        <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
+                                            <div className="flex justify-between">
+                                                <span className="text-sm text-slate-500">مبلغ درخواستی:</span>
+                                                <span className="font-bold text-[#1e3a5f]">
+                                                    {new Intl.NumberFormat("fa-IR").format(activeRequest.requested_amount)} <span className="text-xs font-normal">م.ر</span>
+                                                </span>
                                             </div>
-                                            <ArrowLeft className="w-5 h-5 text-slate-400 group-hover:text-[#1e3a5f] group-hover:-translate-x-1 transition-all" />
+                                            <div className="flex justify-between">
+                                                <span className="text-sm text-slate-500">تاریخ ثبت:</span>
+                                                <span className="text-sm text-slate-700">
+                                                    {new Date(activeRequest.created_date).toLocaleDateString('fa-IR')}
+                                                </span>
+                                            </div>
+                                            <div className="pt-2 border-t border-slate-200">
+                                                <p className="text-sm text-slate-500 mb-1">روش انتخاب شده:</p>
+                                                <p className="font-medium text-[#1e3a5f]">
+                                                    {methods.find(m => m.id === activeRequest.financing_method_id)?.name || "---"}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
-                                </Link>
-
-                                <Link to={createPageUrl("MyRequests")}>
-                                    <div className="p-4 rounded-xl border border-slate-200 hover:border-[#1e3a5f]/30 hover:bg-slate-50 transition-all cursor-pointer group">
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex items-center gap-3">
-                                                <div className="w-10 h-10 rounded-lg bg-emerald-100 flex items-center justify-center">
-                                                    <FileText className="w-5 h-5 text-emerald-600" />
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium text-slate-800">درخواست‌های من</p>
-                                                    <p className="text-xs text-slate-500">{requests.length} درخواست</p>
-                                                </div>
-                                            </div>
-                                            <ArrowLeft className="w-5 h-5 text-slate-400 group-hover:text-[#1e3a5f] group-hover:-translate-x-1 transition-all" />
-                                        </div>
+                                    
+                                    <Link to={createPageUrl("MyRequests")}>
+                                        <Button variant="outline" className="w-full">
+                                            مشاهده جزئیات
+                                        </Button>
+                                    </Link>
+                                </div>
+                            ) : (
+                                <div className="text-center">
+                                    <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+                                        <FileText className="w-6 h-6 text-slate-400" />
                                     </div>
-                                </Link>
-                            </div>
+                                    <p className="text-slate-600 mb-6 text-sm">شما در حال حاضر درخواست فعالی ندارید.</p>
+                                    {company ? (
+                                        <Link to={createPageUrl("MyRequests")}>
+                                            <Button className="w-full bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a]">
+                                                <Plus className="w-4 h-4 mr-2" />
+                                                ثبت درخواست جدید
+                                            </Button>
+                                        </Link>
+                                    ) : (
+                                        <Button disabled className="w-full opacity-50 cursor-not-allowed" title="ابتدا شرکت را ثبت کنید">
+                                            <Plus className="w-4 h-4 mr-2" />
+                                            ثبت درخواست جدید
+                                        </Button>
+                                    )}
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </motion.div>
             </div>
-
-            {/* Recent Requests */}
-            {requests.length > 0 && (
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5 }}
-                >
-                    <Card className="border-0 shadow-lg shadow-slate-200/50">
-                        <CardHeader className="pb-4">
-                            <div className="flex items-center justify-between">
-                                <CardTitle className="text-lg">آخرین درخواست‌ها</CardTitle>
-                                <Link to={createPageUrl("MyRequests")}>
-                                    <Button variant="ghost" size="sm" className="text-[#1e3a5f]">
-                                        مشاهده همه
-                                        <ArrowLeft className="w-4 h-4 mr-1" />
-                                    </Button>
-                                </Link>
+            
+             {/* Recent History (Optional - simplified) */}
+             {requests.length > 1 && (
+                <div className="mt-8">
+                    <h3 className="text-lg font-semibold text-[#1e3a5f] mb-4">تاریخچه درخواست‌ها</h3>
+                    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                        {requests.slice(1, 4).map((request, idx) => (
+                             <div key={request.id} className={`flex items-center justify-between p-4 ${idx !== requests.slice(1,4).length -1 ? 'border-b border-slate-100' : ''}`}>
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${request.status === 'تأیید شده' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
+                                        {request.status === 'تأیید شده' ? <CheckCircle2 className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+                                    </div>
+                                    <div>
+                                        <p className="text-sm font-medium text-slate-800">
+                                             {methods.find(m => m.id === request.financing_method_id)?.name || "درخواست تأمین مالی"}
+                                        </p>
+                                        <p className="text-xs text-slate-500">
+                                            {new Date(request.created_date).toLocaleDateString('fa-IR')}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="text-left">
+                                    <p className="text-sm font-bold text-slate-700">
+                                        {new Intl.NumberFormat("fa-IR").format(request.requested_amount)} <span className="text-xs font-normal text-slate-400">م.ر</span>
+                                    </p>
+                                    <Badge variant="outline" className="text-xs h-5 px-2 bg-slate-50">
+                                        {request.status}
+                                    </Badge>
+                                </div>
                             </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-3">
-                                {requests.slice(0, 3).map((request) => {
-                                    const config = statusConfig[request.status] || statusConfig["در انتظار بررسی"];
-                                    const Icon = config.icon;
-                                    const method = methods.find(m => m.id === request.financing_method_id);
-
-                                    return (
-                                        <div
-                                            key={request.id}
-                                            className="flex items-center justify-between p-4 rounded-xl bg-slate-50 hover:bg-slate-100 transition-colors"
-                                        >
-                                            <div className="flex items-center gap-4">
-                                                <div className={`w-10 h-10 rounded-lg ${config.color.split(' ')[0]} flex items-center justify-center`}>
-                                                    <Icon className={`w-5 h-5 ${config.color.split(' ')[1]}`} />
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium text-slate-800">{method?.name || "روش تأمین مالی"}</p>
-                                                    <p className="text-sm text-slate-500">
-                                                        {new Intl.NumberFormat("fa-IR").format(request.requested_amount)} میلیون ریال
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <Badge className={`${config.color} border`}>
-                                                {request.status}
-                                            </Badge>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                        ))}
+                    </div>
+                </div>
             )}
         </div>
     );

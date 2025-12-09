@@ -29,7 +29,6 @@ export default function Layout({ children, currentPageName }) {
     const navigation = [
         { name: "داشبورد", href: createPageUrl("Dashboard"), icon: LayoutDashboard },
         { name: "اطلاعات شرکت", href: createPageUrl("CompanyProfile"), icon: Building2 },
-        { name: "روش‌های تأمین مالی", href: createPageUrl("FinancingMethods"), icon: CreditCard },
         { name: "درخواست‌های من", href: createPageUrl("MyRequests"), icon: FileText },
     ];
 
