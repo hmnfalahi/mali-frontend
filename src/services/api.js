@@ -1,7 +1,7 @@
 import api from "@/lib/axios";
 
 // Refactored to use real API
-export const base44 = {
+export const apiService = {
     auth: {
         me: async () => {
             // This is now redundant if we use AuthContext, but kept for compatibility or direct usage
@@ -19,6 +19,35 @@ export const base44 = {
     },
     entities: {
         Company: {
+            list: async (params = {}) => {
+                const queryString = new URLSearchParams(params).toString();
+                const response = await api.get(`/companies/?${queryString}`);
+                return response.data;
+            },
+            create: async (data) => {
+                const response = await api.post("/companies/", data);
+                return response.data;
+            },
+            get: async (id) => {
+                const response = await api.get(`/companies/${id}/`);
+                return response.data;
+            },
+            update: async (id, data) => {
+                // Defaulting to PATCH for flexibility as per common frontend patterns, 
+                // but we can expose PUT if needed. 
+                // The doc says PUT for Full Update, PATCH for Partial.
+                // Usually frontend forms send what they have. 
+                // If the caller wants PUT, they can use updateFull.
+                const response = await api.patch(`/companies/${id}/`, data);
+                return response.data;
+            },
+            updateFull: async (id, data) => {
+                 const response = await api.put(`/companies/${id}/`, data);
+                 return response.data;
+            },
+            delete: async (id) => {
+                await api.delete(`/companies/${id}/`);
+            },
             filter: async (query) => {
                 // Mapping filter query to query params
                 const params = new URLSearchParams(query).toString();

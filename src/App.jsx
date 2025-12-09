@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
+import CompanyProfile from './pages/CompanyProfile'
 import Layout from './layouts/Layout'
 
 const queryClient = new QueryClient()
@@ -32,6 +33,9 @@ function LayoutWrapper({ children }) {
   const location = useLocation();
   let pageName = "Dashboard";
   if (location.pathname === "/") pageName = "Landing";
+  if (location.pathname === "/company-profile") pageName = "پروفایل شرکت";
+  if (location.pathname === "/financing-methods") pageName = "روش‌های تأمین مالی";
+  if (location.pathname === "/my-requests") pageName = "درخواست‌های من";
 
   return (
     <Layout currentPageName={pageName}>
@@ -58,7 +62,7 @@ function App() {
 
             <Route path="/company-profile" element={
               <ProtectedRoute>
-                <LayoutWrapper><div className="p-8">Company Profile Page Placeholder</div></LayoutWrapper>
+                <LayoutWrapper><CompanyProfile /></LayoutWrapper>
               </ProtectedRoute>
             } />
 

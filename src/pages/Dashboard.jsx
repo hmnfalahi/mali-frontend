@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
-import { base44 } from "@/api/base44Client";
+import { createPageUrl } from "@/lib/utils";
+import { apiService } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import {
@@ -42,7 +42,7 @@ export default function Dashboard() {
         queryKey: ["company", user?.phone_number], // Use phone_number as identifier
         queryFn: async () => {
             // Assuming API will support filtering by current user implicitly or we pass identifier
-            const companies = await base44.entities.Company.filter({ created_by: user.phone_number });
+            const companies = await apiService.entities.Company.filter({ created_by: user.phone_number });
             return companies[0] || null;
         },
         enabled: !!user,
@@ -51,14 +51,14 @@ export default function Dashboard() {
     const { data: requests = [], isLoading: requestsLoading } = useQuery({
         queryKey: ["requests", user?.phone_number],
         queryFn: async () => {
-            return await base44.entities.FinancingRequest.filter({ created_by: user.phone_number }, "-created_date");
+            return await apiService.entities.FinancingRequest.filter({ created_by: user.phone_number }, "-created_date");
         },
         enabled: !!user,
     });
 
     const { data: methods = [] } = useQuery({
         queryKey: ["methods"],
-        queryFn: () => base44.entities.FinancingMethod.filter({ is_active: true }),
+        queryFn: () => apiService.entities.FinancingMethod.filter({ is_active: true }),
     });
 
     if (!user) {

@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
             // If access token is expired, the interceptor should handle refresh.
             // We assume there's an endpoint to get current user info, e.g., /users/me/
             // Wait, the docs didn't specify a /me endpoint, only Signup/Login/Refresh.
-            // However, the original `base44` mock used `auth.me()`. 
+            // However, the original mock used auth.me(). 
             // I will assume /users/me/ exists or create a shim that uses the stored user data if provided by login.
             // The login response doesn't return user data, only tokens.
             // This is a common pattern where a separate call is needed. 
@@ -33,7 +33,7 @@ export function AuthProvider({ children }) {
             // "Success Response (200 OK): { "access": "...", "refresh": "..." }"
             // It DOES NOT return user info.
             // And Signup returns: { "phone_number": ..., "first_name": ..., "last_name": ... }
-            // The original code `base44.auth.me()` implies need for user details.
+            // The original code apiService.auth.me() implies need for user details.
             // I will try to implement a `fetchUser` method that calls a hypothetical `/users/me/`.
             // If that fails (404), I might have to rely on decoding the JWT if it contains info, or just store the user object on login/signup (if signup auto-logs in, but docs say login flow separate).
             // actually, typically, you decode the access token to get user ID/claims.

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { createPageUrl } from "@/utils";
-import { base44 } from "@/api/base44Client";
+import { createPageUrl } from "@/lib/utils";
+import { apiService } from "@/services/api";
 import {
     CreditCard,
     Building2,
@@ -31,7 +31,7 @@ export default function Home() {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const userData = await base44.auth.me();
+                const userData = await apiService.auth.me();
                 setUser(userData);
                 // If user is already logged in, we might want to stay on landing or redirect to dashboard.
                 // The original code redirected: window.location.href = createPageUrl("Dashboard");
@@ -127,13 +127,13 @@ export default function Home() {
                         <div className="flex items-center gap-3">
                             <Button
                                 variant="ghost"
-                                onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
+                                onClick={() => apiService.auth.redirectToLogin(createPageUrl("Dashboard"))}
                                 className="hidden sm:flex"
                             >
                                 ورود
                             </Button>
                             <Button
-                                onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
+                                onClick={() => apiService.auth.redirectToLogin(createPageUrl("Dashboard"))}
                                 className="bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a]"
                             >
                                 شروع کنید
@@ -196,7 +196,7 @@ export default function Home() {
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <Button
                                     size="lg"
-                                    onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
+                                    onClick={() => apiService.auth.redirectToLogin(createPageUrl("Dashboard"))}
                                     className="bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] h-14 text-lg px-8 shadow-lg shadow-blue-900/20"
                                 >
                                     شروع رایگان
@@ -429,7 +429,7 @@ export default function Home() {
                             </p>
                             <Button
                                 size="lg"
-                                onClick={() => base44.auth.redirectToLogin(createPageUrl("Dashboard"))}
+                                onClick={() => apiService.auth.redirectToLogin(createPageUrl("Dashboard"))}
                                 className="bg-white text-[#1e3a5f] hover:bg-white/90 h-14 text-lg px-8 shadow-lg"
                             >
                                 شروع رایگان
