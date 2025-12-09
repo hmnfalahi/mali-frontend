@@ -47,7 +47,6 @@ function LayoutWrapper({ children }) {
   let pageName = "Dashboard";
   if (location.pathname === "/") pageName = "Landing";
   if (location.pathname === "/company-profile") pageName = "پروفایل شرکت";
-  if (location.pathname === "/financing-methods") pageName = "روش‌های تأمین مالی";
   if (location.pathname === "/my-requests") pageName = "درخواست‌های من";
 
   return (

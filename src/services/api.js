@@ -63,13 +63,6 @@ export const apiService = {
                 const response = await api.get(`/financing-requests/?${params.toString()}`);
                 return response.data;
             }
-        },
-        FinancingMethod: {
-            filter: async (query) => {
-                const params = new URLSearchParams(query).toString();
-                const response = await api.get(`/financing-methods/?${params}`);
-                return response.data;
-            }
         }
     }
 };

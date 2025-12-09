@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/lib/utils";
 import { apiService } from "@/services/api";
@@ -13,11 +13,10 @@ import {
     XCircle,
     ArrowLeft,
     Sparkles,
-    CreditCard,
     AlertCircle,
     Plus
 } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -51,11 +50,6 @@ export default function Dashboard() {
             return await apiService.entities.FinancingRequest.filter({ created_by: user.phone_number }, "-created_date");
         },
         enabled: !!user,
-    });
-
-    const { data: methods = [] } = useQuery({
-        queryKey: ["methods"],
-        queryFn: () => apiService.entities.FinancingMethod.filter({ is_active: true }),
     });
 
     // Determine Active Request (Most recent one that is not Rejected/Approved if we want to be strict, or just the latest one)
@@ -230,9 +224,9 @@ export default function Dashboard() {
                                                 </span>
                                             </div>
                                             <div className="pt-2 border-t border-slate-200">
-                                                <p className="text-sm text-slate-500 mb-1">روش انتخاب شده:</p>
+                                                <p className="text-sm text-slate-500 mb-1">نوع درخواست:</p>
                                                 <p className="font-medium text-[#1e3a5f]">
-                                                    {methods.find(m => m.id === activeRequest.financing_method_id)?.name || "---"}
+                                                    درخواست تأمین مالی
                                                 </p>
                                             </div>
                                         </div>
@@ -283,7 +277,7 @@ export default function Dashboard() {
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-slate-800">
-                                             {methods.find(m => m.id === request.financing_method_id)?.name || "درخواست تأمین مالی"}
+                                             درخواست تأمین مالی
                                         </p>
                                         <p className="text-xs text-slate-500">
                                             {new Date(request.created_date).toLocaleDateString('fa-IR')}

@@ -12,7 +12,6 @@ export function createPageUrl(page) {
         "Home": "/",
         "Landing": "/",
         "CompanyProfile": "/company-profile",
-        "FinancingMethods": "/financing-methods",
         "MyRequests": "/my-requests"
     };
     return mapping[page] || "#";
