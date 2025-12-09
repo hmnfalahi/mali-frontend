@@ -126,8 +126,10 @@ export default function Layout({ children, currentPageName }) {
                                     <User className="w-5 h-5 text-white" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-slate-800 truncate">{user.full_name || "کاربر"}</p>
-                                    <p className="text-xs text-slate-500 truncate">{user.email}</p>
+                                    <p className="text-sm font-medium text-slate-800 truncate">
+                                        {user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.phone_number}
+                                    </p>
+                                    <p className="text-xs text-slate-500 truncate">{user.phone_number}</p>
                                 </div>
                             </div>
                             <Button

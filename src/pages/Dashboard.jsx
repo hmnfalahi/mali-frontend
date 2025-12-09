@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { createPageUrl } from "@/utils";
 import { base44 } from "@/api/base44Client";
+import { useAuth } from "@/context/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import {
     Building2,
@@ -30,33 +31,27 @@ const statusConfig = {
 };
 
 export default function Dashboard() {
-    const [user, setUser] = useState(null);
-
-    useEffect(() => {
-        const loadUser = async () => {
-            try {
-                const userData = await base44.auth.me();
-                setUser(userData);
-            } catch (e) {
-                base44.auth.redirectToLogin();
-            }
-        };
-        loadUser();
-    }, []);
+    const { user } = useAuth(); // Use AuthContext
+    const { data: userData } = useQuery({
+        // Optional: Fetch fresh user data if needed, but context user should suffice for display
+        queryKey: ["me"],
+        initialData: user
+    });
 
     const { data: company, isLoading: companyLoading } = useQuery({
-        queryKey: ["company", user?.email],
+        queryKey: ["company", user?.phone_number], // Use phone_number as identifier
         queryFn: async () => {
-            const companies = await base44.entities.Company.filter({ created_by: user.email });
+            // Assuming API will support filtering by current user implicitly or we pass identifier
+            const companies = await base44.entities.Company.filter({ created_by: user.phone_number });
             return companies[0] || null;
         },
         enabled: !!user,
     });
 
     const { data: requests = [], isLoading: requestsLoading } = useQuery({
-        queryKey: ["requests", user?.email],
+        queryKey: ["requests", user?.phone_number],
         queryFn: async () => {
-            return await base44.entities.FinancingRequest.filter({ created_by: user.email }, "-created_date");
+            return await base44.entities.FinancingRequest.filter({ created_by: user.phone_number }, "-created_date");
         },
         enabled: !!user,
     });
@@ -115,7 +110,7 @@ export default function Dashboard() {
                         <span className="text-sm text-blue-200">خوش آمدید</span>
                     </div>
                     <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                        سلام، {user.full_name || "کاربر گرامی"}
+                        سلام، {user.first_name || "کاربر"} {user.last_name || ""}
                     </h1>
                     <p className="text-blue-200 text-sm md:text-base max-w-xl">
                         به پلتفرم هوشمند تأمین مالی و خدمات مالی خوش آمدید. از اینجا می‌توانید اطلاعات شرکت خود را ثبت کرده و درخواست تأمین مالی دهید.
