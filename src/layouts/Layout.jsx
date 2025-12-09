@@ -14,23 +14,12 @@ import {
     ChevronLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Layout({ children, currentPageName }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [user, setUser] = useState(null);
+    const { user, logout } = useAuth(); // Replaced local state and useEffect with useAuth hook
     const location = useLocation();
-
-    useEffect(() => {
-        const loadUser = async () => {
-            try {
-                const userData = await base44.auth.me();
-                setUser(userData);
-            } catch (e) {
-                console.log("User not logged in");
-            }
-        };
-        loadUser();
-    }, []);
 
     // Landing page doesn't need layout
     if (currentPageName === "Landing" || currentPageName === "Home") {
@@ -117,8 +106,8 @@ export default function Layout({ children, currentPageName }) {
                                     to={item.href}
                                     onClick={() => setSidebarOpen(false)}
                                     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${active
-                                            ? "bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] text-white shadow-lg shadow-blue-900/20"
-                                            : "text-slate-600 hover:bg-slate-100"
+                                        ? "bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] text-white shadow-lg shadow-blue-900/20"
+                                        : "text-slate-600 hover:bg-slate-100"
                                         }`}
                                 >
                                     <Icon className={`w-5 h-5 ${active ? "text-white" : "text-slate-400 group-hover:text-[#1e3a5f]"}`} />
@@ -144,7 +133,7 @@ export default function Layout({ children, currentPageName }) {
                             <Button
                                 variant="ghost"
                                 className="w-full mt-2 text-slate-500 hover:text-red-600 hover:bg-red-50"
-                                onClick={() => base44.auth.logout()}
+                                onClick={() => logout()}
                             >
                                 <LogOut className="w-4 h-4 ml-2" />
                                 خروج از حساب
