@@ -178,11 +178,11 @@ export default function Dashboard() {
                                 <div className="space-y-4">
                                     <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50">
                                         <div>
-                                            <p className="font-semibold text-slate-800">{company.name}</p>
+                                            <p className="font-semibold text-slate-800">{company.title}</p>
                                             <p className="text-sm text-slate-500 mt-1">{company.activity_subject || "موضوع فعالیت ثبت نشده"}</p>
                                         </div>
-                                        <Badge className={company.status === "تکمیل شده" ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}>
-                                            {company.status || "در حال تکمیل"}
+                                        <Badge className={company.title ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"}>
+                                            {company.title ? "اطلاعات ثبت شده" : "در حال تکمیل"}
                                         </Badge>
                                     </div>
                                     <Link to={createPageUrl("CompanyProfile")}>

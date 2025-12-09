@@ -10,8 +10,8 @@ import Layout from './layouts/Layout'
 
 const queryClient = new QueryClient()
 
-function ProtectedRoute({ children }) {
-  const { user, loading } = useAuth();
+function ProtectedRoute({ children, requireCompany = false }) {
+  const { user, loading, hasCompany } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -25,6 +25,19 @@ function ProtectedRoute({ children }) {
   if (!user) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
+
+  // Force company creation if not present (except when already on that page)
+  // If user is logged in BUT has no company, redirect to /company-profile
+  // UNLESS we are already there to avoid loop
+  if (hasCompany === false && location.pathname !== "/company-profile") {
+      return <Navigate to="/company-profile" replace />;
+  }
+  
+  // If requireCompany is true (e.g. for dashboard features) and we don't have it, we redirected above.
+  // But strictly speaking:
+  // - Dashboard: Requires Company? Maybe yes, to see requests.
+  // - My Requests: Yes.
+  // - Company Profile: No (can create).
 
   return children;
 }

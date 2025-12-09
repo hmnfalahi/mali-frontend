@@ -11,7 +11,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 
 export default function CompanyProfile() {
-    const { user } = useAuth();
+    const { user, checkCompanyStatus } = useAuth();
     const navigate = useNavigate();
     const queryClient = useQueryClient();
     const [error, setError] = useState(null);
@@ -93,8 +93,9 @@ export default function CompanyProfile() {
 
     const createMutation = useMutation({
         mutationFn: apiService.entities.Company.create,
-        onSuccess: () => {
+        onSuccess: async () => {
             queryClient.invalidateQueries(["company"]);
+            await checkCompanyStatus(); // Update context
             navigate("/dashboard");
         },
         onError: (err) => {
