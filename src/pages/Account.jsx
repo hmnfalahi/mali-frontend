@@ -123,10 +123,13 @@ export default function Account() {
     return (
         <div className="max-w-2xl mx-auto space-y-6">
             {/* Header */}
-            <div>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+            >
                 <h1 className="text-2xl font-bold text-slate-800">حساب کاربری</h1>
                 <p className="text-slate-500 mt-1">مدیریت اطلاعات حساب کاربری</p>
-            </div>
+            </motion.div>
 
             {/* Messages */}
             <AnimatePresence>
@@ -158,6 +161,11 @@ export default function Account() {
             </AnimatePresence>
 
             {/* Profile Card */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 }}
+            >
             <Card className="border-0 shadow-lg shadow-slate-200/50">
                 <CardHeader className="border-b border-slate-100">
                     <div className="flex items-center justify-between">
@@ -277,8 +285,14 @@ export default function Account() {
                     </div>
                 </CardContent>
             </Card>
+            </motion.div>
 
             {/* Security Card */}
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.2 }}
+            >
             <Card className="border-0 shadow-lg shadow-slate-200/50">
                 <CardHeader className="border-b border-slate-100">
                     <div className="flex items-center gap-3">
@@ -336,6 +350,7 @@ export default function Account() {
                     </div>
                 </CardContent>
             </Card>
+            </motion.div>
         </div>
     );
 }
