@@ -119,17 +119,35 @@ export default function Layout({ children, currentPageName }) {
                     {/* User Section */}
                     {user && (
                         <div className="p-4 border-t border-slate-100">
-                            <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-slate-50">
-                                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#d4af37] to-[#e8c963] flex items-center justify-center">
-                                    <User className="w-5 h-5 text-white" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-slate-800 truncate">
-                                        {user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.phone_number}
-                                    </p>
-                                    <p className="text-xs text-slate-500 truncate">{user.phone_number}</p>
-                                </div>
-                            </div>
+                            {(() => {
+                                const isAccountActive = isActive(createPageUrl("Account"));
+                                return (
+                                    <Link
+                                        to={createPageUrl("Account")}
+                                        onClick={() => setSidebarOpen(false)}
+                                        className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                                            isAccountActive
+                                                ? "bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] shadow-lg shadow-blue-900/20"
+                                                : "bg-slate-50 hover:bg-slate-100"
+                                        }`}
+                                    >
+                                        <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                                            isAccountActive
+                                                ? "bg-white/20"
+                                                : "bg-gradient-to-br from-[#d4af37] to-[#e8c963]"
+                                        }`}>
+                                            <User className="w-5 h-5 text-white" />
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className={`text-sm font-medium truncate ${isAccountActive ? "text-white" : "text-slate-800"}`}>
+                                                {user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.phone_number}
+                                            </p>
+                                            <p className={`text-xs truncate ${isAccountActive ? "text-white/70" : "text-slate-500"}`}>{user.phone_number}</p>
+                                        </div>
+                                        <ChevronLeft className={`w-4 h-4 ${isAccountActive ? "text-white" : "text-slate-400"}`} />
+                                    </Link>
+                                );
+                            })()}
                             <Button
                                 variant="ghost"
                                 className="w-full mt-2 text-slate-500 hover:text-red-600 hover:bg-red-50"

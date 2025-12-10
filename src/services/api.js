@@ -14,6 +14,14 @@ export const apiService = {
             const response = await api.get("/users/me/");
             return response.data;
         },
+        /**
+         * Update user profile (first_name, last_name)
+         * @param {Object} data - { first_name, last_name }
+         */
+        updateProfile: async (data) => {
+            const response = await api.patch("/users/me/update/", data);
+            return response.data;
+        },
         logout: async () => {
             localStorage.removeItem("access_token");
             localStorage.removeItem("refresh_token");

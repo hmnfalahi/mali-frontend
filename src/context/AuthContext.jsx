@@ -126,6 +126,21 @@ export function AuthProvider({ children }) {
         }
     };
 
+    // Method to refresh user data (called after profile update)
+    const refreshUser = async () => {
+        try {
+            const response = await api.get("/users/me/");
+            setUser(response.data);
+        } catch (e) {
+            console.error("Failed to refresh user data", e);
+        }
+    };
+
+    // Method to update user data locally (for optimistic updates)
+    const updateUserData = (data) => {
+        setUser(prev => ({ ...prev, ...data }));
+    };
+
     return (
         <AuthContext.Provider value={{ 
             user, 
@@ -138,7 +153,9 @@ export function AuthProvider({ children }) {
             loading, 
             hasCompany, 
             companyId,
-            checkCompanyStatus 
+            checkCompanyStatus,
+            refreshUser,
+            updateUserData
         }}>
             {!loading && children}
         </AuthContext.Provider>
