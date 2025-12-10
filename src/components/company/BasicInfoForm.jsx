@@ -11,6 +11,19 @@ export default function BasicInfoForm({ data, onChange }) {
     onChange({ ...data, [field]: value });
   };
 
+  const handleNationalIdChange = (value) => {
+    // Only allow digits and max 11 characters
+    const cleaned = value.replace(/\D/g, '').slice(0, 11);
+    onChange({ ...data, national_id: cleaned });
+  };
+
+  const handlePersonnelCountChange = (value) => {
+    // Only allow positive integers
+    if (value === "" || /^\d+$/.test(value)) {
+      onChange({ ...data, personnel_count: value });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -26,18 +39,57 @@ export default function BasicInfoForm({ data, onChange }) {
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="national_id">شناسه ملی شرکت <span className="text-red-500">*</span></Label>
+          <Input
+            id="national_id"
+            type="text"
+            inputMode="numeric"
+            value={data.national_id || ""}
+            onChange={(e) => handleNationalIdChange(e.target.value)}
+            placeholder="۱۱ رقمی (مثال: 10123456789)"
+            className="h-12 text-left font-mono"
+            dir="ltr"
+            maxLength={11}
+          />
+          {data.national_id && data.national_id.length !== 11 && (
+            <p className="text-xs text-amber-600">شناسه ملی باید ۱۱ رقم باشد ({data.national_id.length}/۱۱)</p>
+          )}
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-2">
+          <Label htmlFor="personnel_count">تعداد پرسنل <span className="text-red-500">*</span></Label>
+          <div className="relative">
+            <Input
+              id="personnel_count"
+              type="text"
+              inputMode="numeric"
+              value={data.personnel_count || ""}
+              onChange={(e) => handlePersonnelCountChange(e.target.value)}
+              placeholder="مثال: 50"
+              className="h-12 text-left font-mono pl-12"
+              dir="ltr"
+            />
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
+              نفر
+            </span>
+          </div>
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="fiscal_year_end_date">تاریخ پایان سال مالی <span className="text-red-500">*</span></Label>
           <JalaliDatePicker
             id="fiscal_year_end_date"
             value={data.fiscal_year_end_date || ""}
             onChange={(value) => handleChange("fiscal_year_end_date", value)}
-            placeholder="۱۴۰۳/۱۲/۲۹"
+            placeholder="انتخاب تاریخ"
           />
         </div>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="activity_subject">موضوع فعالیت <span className="text-red-500">*</span></Label>
+        <Label htmlFor="activity_subject">موضوع فعالیت مطابق اساسنامه <span className="text-red-500">*</span></Label>
         <Textarea
           id="activity_subject"
           value={data.activity_subject || ""}

@@ -67,7 +67,7 @@ export default function CompanyProfile() {
     const payload = { ...data };
 
     const numberFields = [
-      "registered_capital", "latest_net_profit", "latest_operating_profit", "latest_inventory",
+      "personnel_count", "registered_capital", "latest_net_profit", "latest_operating_profit", "latest_inventory",
       "avg_working_capital", "disclosed_fixed_assets", "insured_fixed_assets", "depreciable_assets",
       "dev_plan_accumulated_cost", "dev_plan_remaining_cost",
       "total_assets", "total_liabilities", "latest_cash_on_hand", "cash_from_operations",
@@ -124,6 +124,9 @@ export default function CompanyProfile() {
     switch (step) {
       case 1:
         if (!formData.title) return "نام شرکت الزامی است";
+        if (!formData.national_id) return "شناسه ملی الزامی است";
+        if (formData.national_id && formData.national_id.length !== 11) return "شناسه ملی باید ۱۱ رقم باشد";
+        if (!formData.personnel_count) return "تعداد پرسنل الزامی است";
         if (!formData.activity_subject) return "موضوع فعالیت الزامی است";
         if (!formData.fiscal_year_end_date) return "تاریخ پایان سال مالی الزامی است";
         if (!formData.audit_opinion_status) return "وضعیت اظهارنظر حسابرس الزامی است";
