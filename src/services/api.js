@@ -63,6 +63,20 @@ export const apiService = {
                 });
                 return response.data;
             }
+        },
+        /**
+         * Reset password with OTP code
+         * @param {string} phone_number - Iranian phone number
+         * @param {string} code - 6-digit OTP code
+         * @param {string} new_password - New password
+         */
+        resetPassword: async (phone_number, code, new_password) => {
+            const response = await publicApi.post("/users/password/reset/", {
+                phone_number,
+                code,
+                new_password
+            });
+            return response.data;
         }
     },
     entities: {

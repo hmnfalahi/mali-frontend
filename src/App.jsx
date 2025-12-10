@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard'
 import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
+import ForgotPassword from './pages/ForgotPassword'
 import CompanyProfile from './pages/CompanyProfile'
 import MyRequests from './pages/MyRequests'
 import Layout from './layouts/Layout'
@@ -66,6 +67,7 @@ function App() {
             <Route path="/" element={<LayoutWrapper><Home /></LayoutWrapper>} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
 
             <Route path="/dashboard" element={
               <ProtectedRoute>
