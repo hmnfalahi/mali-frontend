@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { createPageUrl } from "@/lib/utils";
-import { apiService } from "@/services/api";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
 import {
     CreditCard,
     Building2,
@@ -24,7 +24,8 @@ import {
     Briefcase,
     Target,
     Wallet,
-    ArrowUpRight
+    ArrowUpRight,
+    LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -32,6 +33,7 @@ import { motion } from "framer-motion";
 
 export default function Home() {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { user, logout } = useAuth();
 
     const features = [
         {
@@ -155,20 +157,42 @@ export default function Home() {
                         </nav>
 
                         <div className="flex items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                onClick={() => apiService.auth.redirectToLogin(createPageUrl("Dashboard"))}
-                                className="hidden sm:flex text-sm"
-                            >
-                                ورود
-                            </Button>
-                            <Button
-                                onClick={() => apiService.auth.redirectToLogin(createPageUrl("Dashboard"))}
-                                className="bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] text-sm h-9"
-                            >
-                                شروع رایگان
-                                <ArrowLeft className="w-4 h-4 mr-1" />
-                            </Button>
+                            {user ? (
+                                <>
+                                    <span className="hidden sm:block text-sm text-slate-600">
+                                        سلام، <span className="font-medium text-[#1e3a5f]">{user.first_name || user.phone_number}</span>
+                                    </span>
+                                    <Link to="/dashboard">
+                                        <Button className="bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] text-sm h-9">
+                                            داشبورد
+                                            <ArrowLeft className="w-4 h-4 mr-1" />
+                                        </Button>
+                                    </Link>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={() => logout()}
+                                        className="text-slate-500 hover:text-red-600 hover:bg-red-50"
+                                        title="خروج"
+                                    >
+                                        <LogOut className="w-4 h-4" />
+                                    </Button>
+                                </>
+                            ) : (
+                                <>
+                                    <Link to="/login">
+                                        <Button variant="ghost" className="hidden sm:flex text-sm">
+                                            ورود
+                                        </Button>
+                                    </Link>
+                                    <Link to="/signup">
+                                        <Button className="bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] text-sm h-9">
+                                            شروع رایگان
+                                            <ArrowLeft className="w-4 h-4 mr-1" />
+                                        </Button>
+                                    </Link>
+                                </>
+                            )}
 
                             <Button
                                 variant="ghost"
@@ -225,14 +249,27 @@ export default function Home() {
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                            <Button
-                                size="lg"
-                                onClick={() => apiService.auth.redirectToLogin(createPageUrl("Dashboard"))}
-                                className="bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] h-12 text-base px-6 shadow-lg shadow-blue-900/20"
-                            >
-                                شروع رایگان
-                                <ArrowLeft className="w-5 h-5 mr-2" />
-                            </Button>
+                            {user ? (
+                                <Link to="/dashboard">
+                                    <Button
+                                        size="lg"
+                                        className="bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] h-12 text-base px-6 shadow-lg shadow-blue-900/20"
+                                    >
+                                        رفتن به داشبورد
+                                        <ArrowLeft className="w-5 h-5 mr-2" />
+                                    </Button>
+                                </Link>
+                            ) : (
+                                <Link to="/signup">
+                                    <Button
+                                        size="lg"
+                                        className="bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] h-12 text-base px-6 shadow-lg shadow-blue-900/20"
+                                    >
+                                        شروع رایگان
+                                        <ArrowLeft className="w-5 h-5 mr-2" />
+                                    </Button>
+                                </Link>
+                            )}
                             <Button
                                 size="lg"
                                 variant="outline"
@@ -478,20 +515,36 @@ export default function Home() {
 
                         <div className="relative z-10">
                             <h2 className="text-2xl sm:text-3xl font-bold mb-3">
-                                آماده شروع هستید؟
+                                {user ? "به داشبورد خود بروید" : "آماده شروع هستید؟"}
                             </h2>
                             <p className="text-blue-100 mb-6 max-w-lg mx-auto">
-                                همین حالا رایگان ثبت‌نام کنید و درخواست تأمین مالی خود را ثبت کنید
+                                {user 
+                                    ? "درخواست‌های تأمین مالی خود را مدیریت کنید و وضعیت آن‌ها را پیگیری کنید"
+                                    : "همین حالا رایگان ثبت‌نام کنید و درخواست تأمین مالی خود را ثبت کنید"
+                                }
                             </p>
                             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                                <Button
-                                    size="lg"
-                                    onClick={() => apiService.auth.redirectToLogin(createPageUrl("Dashboard"))}
-                                    className="bg-white text-[#1e3a5f] hover:bg-white/90 h-12 px-6 shadow-lg"
-                                >
-                                    شروع رایگان
-                                    <ArrowLeft className="w-5 h-5 mr-2" />
-                                </Button>
+                                {user ? (
+                                    <Link to="/dashboard">
+                                        <Button
+                                            size="lg"
+                                            className="bg-white text-[#1e3a5f] hover:bg-white/90 h-12 px-6 shadow-lg"
+                                        >
+                                            رفتن به داشبورد
+                                            <ArrowLeft className="w-5 h-5 mr-2" />
+                                        </Button>
+                                    </Link>
+                                ) : (
+                                    <Link to="/signup">
+                                        <Button
+                                            size="lg"
+                                            className="bg-white text-[#1e3a5f] hover:bg-white/90 h-12 px-6 shadow-lg"
+                                        >
+                                            شروع رایگان
+                                            <ArrowLeft className="w-5 h-5 mr-2" />
+                                        </Button>
+                                    </Link>
+                                )}
                                 <Button
                                     size="lg"
                                     variant="outline"
