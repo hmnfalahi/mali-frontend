@@ -13,7 +13,9 @@ import {
     Loader2, 
     CheckCircle2,
     RefreshCw,
-    CreditCard
+    CreditCard,
+    Lock,
+    Smartphone
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -22,13 +24,17 @@ const OTP_LENGTH = 6;
 const RESEND_COOLDOWN = 60; // seconds
 
 export default function Login() {
-    const { sendOTP, otpLogin, user } = useAuth();
+    const { login, sendOTP, otpLogin, user } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
+    // Login method: 'password' or 'otp'
+    const [loginMethod, setLoginMethod] = useState("otp");
+    
     // Form state
-    const [step, setStep] = useState("phone"); // 'phone' | 'otp'
+    const [step, setStep] = useState("phone"); // 'phone' | 'otp' (for OTP method)
     const [phoneNumber, setPhoneNumber] = useState("");
+    const [password, setPassword] = useState("");
     const [otpCode, setOtpCode] = useState(["", "", "", "", "", ""]);
     const [error, setError] = useState("");
     const [successMessage, setSuccessMessage] = useState("");
@@ -87,7 +93,39 @@ export default function Login() {
         return /^09[0-9]{9}$/.test(normalized);
     };
 
-    // Handle phone submission
+    // Handle password login
+    const handlePasswordLogin = async (e) => {
+        e.preventDefault();
+        setError("");
+
+        const normalized = normalizePhoneNumber(phoneNumber);
+        
+        if (!isValidPhoneNumber(normalized)) {
+            setError("شماره موبایل معتبر نیست");
+            return;
+        }
+
+        if (!password) {
+            setError("رمز عبور را وارد کنید");
+            return;
+        }
+
+        setIsLoading(true);
+        try {
+            await login(normalized, password);
+            const returnUrl = new URLSearchParams(location.search).get("returnUrl");
+            navigate(returnUrl || "/dashboard", { replace: true });
+        } catch (err) {
+            const errorMsg = err.response?.data?.detail || 
+                            err.response?.data?.message ||
+                            "شماره موبایل یا رمز عبور اشتباه است";
+            setError(errorMsg);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Handle phone submission (send OTP)
     const handleSendOTP = async (e) => {
         e?.preventDefault();
         setError("");
@@ -124,19 +162,16 @@ export default function Login() {
 
     // Handle OTP input change
     const handleOtpChange = (index, value) => {
-        // Only allow digits
         const digit = value.replace(/\D/g, "").slice(-1);
         
         const newOtp = [...otpCode];
         newOtp[index] = digit;
         setOtpCode(newOtp);
 
-        // Auto-focus next input
         if (digit && index < OTP_LENGTH - 1) {
             otpInputRefs.current[index + 1]?.focus();
         }
 
-        // Auto-submit when all digits are entered
         if (digit && index === OTP_LENGTH - 1) {
             const fullCode = newOtp.join("");
             if (fullCode.length === OTP_LENGTH) {
@@ -157,7 +192,7 @@ export default function Login() {
         }
     };
 
-    // Handle OTP key down (backspace navigation)
+    // Handle OTP key down
     const handleOtpKeyDown = (index, e) => {
         if (e.key === "Backspace" && !otpCode[index] && index > 0) {
             otpInputRefs.current[index - 1]?.focus();
@@ -171,12 +206,9 @@ export default function Login() {
 
         try {
             const response = await otpLogin(phoneNumber, code);
-            
-            // Login successful
             const returnUrl = new URLSearchParams(location.search).get("returnUrl");
             
             if (response.is_new_user) {
-                // New user - redirect to complete profile
                 navigate("/company-profile", { replace: true });
             } else {
                 navigate(returnUrl || "/dashboard", { replace: true });
@@ -186,7 +218,6 @@ export default function Login() {
                             err.response?.data?.detail ||
                             "کد تایید نادرست است";
             setError(errorMsg);
-            // Clear OTP and focus first input
             setOtpCode(["", "", "", "", "", ""]);
             otpInputRefs.current[0]?.focus();
         } finally {
@@ -194,7 +225,7 @@ export default function Login() {
         }
     };
 
-    // Handle form submit
+    // Handle OTP form submit
     const handleOtpSubmit = (e) => {
         e.preventDefault();
         const code = otpCode.join("");
@@ -219,6 +250,16 @@ export default function Login() {
         setSuccessMessage("");
     };
 
+    // Switch login method
+    const switchLoginMethod = (method) => {
+        setLoginMethod(method);
+        setStep("phone");
+        setError("");
+        setSuccessMessage("");
+        setOtpCode(["", "", "", "", "", ""]);
+        setPassword("");
+    };
+
     return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4" dir="rtl">
             <div className="w-full max-w-md">
@@ -241,25 +282,59 @@ export default function Login() {
                             ورود به حساب
                         </CardTitle>
                         <CardDescription className="text-center text-slate-500">
-                            {step === "phone" 
-                                ? "شماره موبایل خود را وارد کنید" 
-                                : `کد تایید ارسال شده به ${phoneNumber} را وارد کنید`
+                            {loginMethod === "password" 
+                                ? "با شماره موبایل و رمز عبور وارد شوید"
+                                : step === "phone" 
+                                    ? "شماره موبایل خود را وارد کنید" 
+                                    : `کد تایید ارسال شده به ${phoneNumber} را وارد کنید`
                             }
-                        </CardDescription>
-                    </CardHeader>
+                    </CardDescription>
+                </CardHeader>
+
+                    {/* Login Method Tabs */}
+                    {step === "phone" && (
+                        <div className="px-6 pb-2">
+                            <div className="flex bg-slate-100 rounded-xl p-1">
+                                <button
+                                    type="button"
+                                    onClick={() => switchLoginMethod("otp")}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                                        loginMethod === "otp"
+                                            ? "bg-white text-[#1e3a5f] shadow-sm"
+                                            : "text-slate-500 hover:text-slate-700"
+                                    }`}
+                                >
+                                    <Smartphone className="w-4 h-4" />
+                                    کد تایید
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => switchLoginMethod("password")}
+                                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-medium transition-all ${
+                                        loginMethod === "password"
+                                            ? "bg-white text-[#1e3a5f] shadow-sm"
+                                            : "text-slate-500 hover:text-slate-700"
+                                    }`}
+                                >
+                                    <Lock className="w-4 h-4" />
+                                    رمز عبور
+                                </button>
+                            </div>
+                        </div>
+                        )}
 
                     <AnimatePresence mode="wait">
-                        {step === "phone" ? (
+                        {/* Password Login */}
+                        {loginMethod === "password" && (
                             <motion.div
-                                key="phone"
+                                key="password"
                                 initial={{ opacity: 0, x: -20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: 20 }}
                                 transition={{ duration: 0.2 }}
                             >
-                                <form onSubmit={handleSendOTP}>
+                                <form onSubmit={handlePasswordLogin}>
                                     <CardContent className="space-y-4">
-                                        {/* Error Message */}
                                         {error && (
                                             <motion.div
                                                 initial={{ opacity: 0, y: -10 }}
@@ -271,14 +346,98 @@ export default function Login() {
                                             </motion.div>
                                         )}
 
-                                        {/* Phone Input */}
+                        <div className="space-y-2">
+                                            <Label htmlFor="phone-pass" className="flex items-center gap-2">
+                                                <Phone className="w-4 h-4 text-slate-400" />
+                                                شماره موبایل
+                                            </Label>
+                            <Input
+                                                id="phone-pass"
+                                type="tel"
+                                                inputMode="numeric"
+                                                placeholder="09123456789"
+                                                value={phoneNumber}
+                                                onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+                                                className="h-12 text-left font-mono"
+                                                dir="ltr"
+                                                maxLength={11}
+                                required
+                            />
+                        </div>
+
+                        <div className="space-y-2">
+                                            <Label htmlFor="password" className="flex items-center gap-2">
+                                                <Lock className="w-4 h-4 text-slate-400" />
+                                                رمز عبور
+                                            </Label>
+                            <Input
+                                id="password"
+                                type="password"
+                                                placeholder="رمز عبور"
+                                                value={password}
+                                                onChange={(e) => setPassword(e.target.value)}
+                                                className="h-12"
+                                required
+                            />
+                        </div>
+                    </CardContent>
+
+                                    <CardFooter className="flex flex-col gap-4">
+                                        <Button 
+                                            type="submit"
+                                            className="w-full h-12 bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] text-base"
+                                            disabled={isLoading}
+                                        >
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="w-5 h-5 animate-spin ml-2" />
+                                                    در حال ورود...
+                                                </>
+                                            ) : (
+                                                "ورود"
+                                            )}
+                                        </Button>
+
+                                        <div className="text-center text-sm text-slate-600">
+                                            حساب کاربری ندارید؟{" "}
+                                            <Link to="/signup" className="text-[#1e3a5f] hover:underline font-medium">
+                                                ثبت‌نام کنید
+                                            </Link>
+                                        </div>
+                                    </CardFooter>
+                                </form>
+                            </motion.div>
+                        )}
+
+                        {/* OTP Login - Phone Step */}
+                        {loginMethod === "otp" && step === "phone" && (
+                            <motion.div
+                                key="otp-phone"
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <form onSubmit={handleSendOTP}>
+                                    <CardContent className="space-y-4">
+                                        {error && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="bg-red-50 text-red-600 p-3 rounded-xl text-sm flex items-center gap-2 border border-red-100"
+                                            >
+                                                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                                                {error}
+                                            </motion.div>
+                                        )}
+
                                         <div className="space-y-2">
-                                            <Label htmlFor="phone" className="flex items-center gap-2">
+                                            <Label htmlFor="phone-otp" className="flex items-center gap-2">
                                                 <Phone className="w-4 h-4 text-slate-400" />
                                                 شماره موبایل
                                             </Label>
                                             <Input
-                                                id="phone"
+                                                id="phone-otp"
                                                 type="tel"
                                                 inputMode="numeric"
                                                 placeholder="09123456789"
@@ -296,7 +455,7 @@ export default function Login() {
                                         </div>
                                     </CardContent>
 
-                                    <CardFooter className="flex flex-col gap-4">
+                    <CardFooter className="flex flex-col gap-4">
                                         <Button 
                                             type="submit"
                                             className="w-full h-12 bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] text-base"
@@ -313,21 +472,23 @@ export default function Login() {
                                                     <ArrowRight className="w-5 h-5 mr-2 rotate-180" />
                                                 </>
                                             )}
-                                        </Button>
+                        </Button>
 
-                                        <div className="text-center text-sm text-slate-500">
-                                            با ورود، شما{" "}
-                                            <Link to="/terms" className="text-[#1e3a5f] hover:underline">
-                                                قوانین و مقررات
-                                            </Link>
-                                            {" "}را می‌پذیرید.
-                                        </div>
-                                    </CardFooter>
-                                </form>
+                        <div className="text-center text-sm text-slate-600">
+                            حساب کاربری ندارید؟{" "}
+                                            <Link to="/signup" className="text-[#1e3a5f] hover:underline font-medium">
+                                ثبت‌نام کنید
+                            </Link>
+                        </div>
+                    </CardFooter>
+                </form>
                             </motion.div>
-                        ) : (
+                        )}
+
+                        {/* OTP Login - Code Step */}
+                        {loginMethod === "otp" && step === "otp" && (
                             <motion.div
-                                key="otp"
+                                key="otp-code"
                                 initial={{ opacity: 0, x: 20 }}
                                 animate={{ opacity: 1, x: 0 }}
                                 exit={{ opacity: 0, x: -20 }}
@@ -335,7 +496,6 @@ export default function Login() {
                             >
                                 <form onSubmit={handleOtpSubmit}>
                                     <CardContent className="space-y-6">
-                                        {/* Success Message */}
                                         {successMessage && (
                                             <motion.div
                                                 initial={{ opacity: 0, y: -10 }}
@@ -347,7 +507,6 @@ export default function Login() {
                                             </motion.div>
                                         )}
 
-                                        {/* Error Message */}
                                         {error && (
                                             <motion.div
                                                 initial={{ opacity: 0, y: -10 }}
@@ -359,7 +518,6 @@ export default function Login() {
                                             </motion.div>
                                         )}
 
-                                        {/* OTP Input */}
                                         <div className="space-y-3">
                                             <Label className="flex items-center gap-2 justify-center">
                                                 <KeyRound className="w-4 h-4 text-slate-400" />
@@ -384,7 +542,6 @@ export default function Login() {
                                             </div>
                                         </div>
 
-                                        {/* Countdown / Resend */}
                                         <div className="text-center">
                                             {countdown > 0 ? (
                                                 <p className="text-sm text-slate-500">
@@ -440,7 +597,7 @@ export default function Login() {
                             </motion.div>
                         )}
                     </AnimatePresence>
-                </Card>
+            </Card>
 
                 {/* Back to Home */}
                 <div className="mt-6 text-center">

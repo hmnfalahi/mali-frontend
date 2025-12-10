@@ -64,7 +64,7 @@ export function JalaliDatePicker({
                 setViewYear(jalali.jy);
                 setViewMonth(jalali.jm);
                 setInputValue(isoToJalaliInput(value));
-                setIsValid(true);
+            setIsValid(true);
             }
         } else {
             setSelectedDate(null);
@@ -270,26 +270,26 @@ export function JalaliDatePicker({
     return (
         <div ref={containerRef} className="relative" dir="rtl">
             {/* Input field */}
-            <div className="relative">
-                <Input
-                    id={id}
-                    type="text"
-                    inputMode="numeric"
-                    value={inputValue}
+        <div className="relative">
+            <Input
+                id={id}
+                type="text"
+                inputMode="numeric"
+                value={inputValue}
                     onChange={handleInputChange}
                     onBlur={handleInputBlur}
                     onFocus={() => !disabled && setIsOpen(true)}
-                    placeholder={placeholder}
-                    disabled={disabled}
-                    required={required}
+                placeholder={placeholder}
+                disabled={disabled}
+                required={required}
                     className={`
                         h-12 pl-12 pr-4 text-right font-sans cursor-pointer
                         ${!isValid ? 'border-red-500 focus:ring-red-500' : ''}
                         ${className}
                     `}
-                    autoComplete="off"
-                    {...props}
-                />
+                autoComplete="off"
+                {...props}
+            />
                 <button
                     type="button"
                     onClick={() => !disabled && setIsOpen(!isOpen)}
