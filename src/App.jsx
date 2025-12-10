@@ -9,6 +9,7 @@ import ForgotPassword from './pages/ForgotPassword'
 import CompanyProfile from './pages/CompanyProfile'
 import MyRequests from './pages/MyRequests'
 import Account from './pages/Account'
+import ChangePassword from './pages/ChangePassword'
 import Layout from './layouts/Layout'
 
 const queryClient = new QueryClient()
@@ -91,6 +92,12 @@ function App() {
             <Route path="/account" element={
               <ProtectedRoute>
                 <LayoutWrapper><Account /></LayoutWrapper>
+              </ProtectedRoute>
+            } />
+
+            <Route path="/change-password" element={
+              <ProtectedRoute>
+                <LayoutWrapper><ChangePassword /></LayoutWrapper>
               </ProtectedRoute>
             } />
           </Routes>

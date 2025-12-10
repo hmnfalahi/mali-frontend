@@ -304,7 +304,7 @@ export default function Account() {
                                     <p className="text-sm text-slate-500">رمز عبور خود را تغییر دهید</p>
                                 </div>
                             </div>
-                            <Link to="/forgot-password">
+                            <Link to="/change-password">
                                 <Button variant="outline" size="sm">
                                     تغییر
                                 </Button>
