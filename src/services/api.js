@@ -42,8 +42,8 @@ export const apiService = {
                 return response.data;
             },
             updateFull: async (id, data) => {
-                 const response = await api.put(`/companies/${id}/`, data);
-                 return response.data;
+                const response = await api.put(`/companies/${id}/`, data);
+                return response.data;
             },
             delete: async (id) => {
                 await api.delete(`/companies/${id}/`);
@@ -57,10 +57,35 @@ export const apiService = {
             }
         },
         FinancingRequest: {
+            // Legacy filter method for backward compatibility
             filter: async (query, orderBy) => {
                 const params = new URLSearchParams(query);
                 if (orderBy) params.append("ordering", orderBy);
                 const response = await api.get(`/financing-requests/?${params.toString()}`);
+                return response.data;
+            },
+            // Main endpoints (per API docs: Base URL /api/financing-requests/)
+            list: async () => {
+                const response = await api.get("/financing-requests/");
+                return response.data;
+            },
+            create: async (data) => {
+                const response = await api.post("/financing-requests/", data);
+                return response.data;
+            },
+            get: async (id) => {
+                const response = await api.get(`/financing-requests/${id}/`);
+                return response.data;
+            },
+            update: async (id, data) => {
+                const response = await api.patch(`/financing-requests/${id}/`, data);
+                return response.data;
+            },
+            delete: async (id) => {
+                await api.delete(`/financing-requests/${id}/`);
+            },
+            submit: async (id) => {
+                const response = await api.post(`/financing-requests/${id}/submit/`);
                 return response.data;
             }
         }

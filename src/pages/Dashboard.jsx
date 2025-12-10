@@ -23,16 +23,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 
 const statusConfig = {
-    "در انتظار بررسی": { color: "bg-amber-100 text-amber-700 border-amber-200", icon: Clock },
-    "در حال بررسی": { color: "bg-blue-100 text-blue-700 border-blue-200", icon: TrendingUp },
-    "تأیید شده": { color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
-    "رد شده": { color: "bg-red-100 text-red-700 border-red-200", icon: XCircle },
-    "نیاز به اصلاح": { color: "bg-orange-100 text-orange-700 border-orange-200", icon: AlertCircle },
+    "DRAFT": { label: "پیش‌نویس", color: "bg-slate-100 text-slate-700 border-slate-200", icon: Clock },
+    "PENDING": { label: "در انتظار بررسی", color: "bg-amber-100 text-amber-700 border-amber-200", icon: Clock },
+    "UNDER_REVIEW": { label: "در حال بررسی", color: "bg-blue-100 text-blue-700 border-blue-200", icon: TrendingUp },
+    "APPROVED": { label: "تأیید شده", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
+    "REJECTED": { label: "رد شده", color: "bg-red-100 text-red-700 border-red-200", icon: XCircle },
+    "ADDITIONAL_INFO_REQUIRED": { label: "نیاز به اصلاح", color: "bg-orange-100 text-orange-700 border-orange-200", icon: AlertCircle },
+    "COMPLETED": { label: "تکمیل شده", color: "bg-green-100 text-green-700 border-green-200", icon: CheckCircle2 },
+    "CANCELLED": { label: "لغو شده", color: "bg-gray-100 text-gray-700 border-gray-200", icon: XCircle },
 };
 
 export default function Dashboard() {
     const { user } = useAuth();
-    
+
     // Fetch Company Data
     const { data: company, isLoading: companyLoading } = useQuery({
         queryKey: ["company", user?.phone_number],
@@ -56,7 +59,7 @@ export default function Dashboard() {
     // Based on user query "we allow only 1 active request", we assume the top one is the active one if exists.
     // If the latest one is rejected/approved, then maybe there is no active request.
     const activeRequest = requests.length > 0 ? requests[0] : null;
-    const isActive = activeRequest && activeRequest.status !== "رد شده" && activeRequest.status !== "تأیید شده";
+    const isActive = activeRequest && activeRequest.status !== "REJECTED" && activeRequest.status !== "APPROVED" && activeRequest.status !== "COMPLETED" && activeRequest.status !== "CANCELLED";
 
     if (!user) {
         return (
@@ -136,7 +139,7 @@ export default function Dashboard() {
                                             {company.title ? "اطلاعات کامل" : "نقص اطلاعات"}
                                         </Badge>
                                     </div>
-                                    
+
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
                                         <div>
                                             <p className="text-xs text-slate-400 mb-1">سرمایه ثبت شده</p>
@@ -207,7 +210,7 @@ export default function Dashboard() {
                                         <div className="flex justify-between items-start mb-2">
                                             <p className="text-sm text-slate-500">وضعیت درخواست</p>
                                             <Badge className={statusConfig[activeRequest.status]?.color || "bg-slate-100 text-slate-700"}>
-                                                {activeRequest.status}
+                                                {statusConfig[activeRequest.status]?.label || activeRequest.status}
                                             </Badge>
                                         </div>
                                         <div className="bg-slate-50 p-4 rounded-xl border border-slate-100 space-y-3">
@@ -220,7 +223,7 @@ export default function Dashboard() {
                                             <div className="flex justify-between">
                                                 <span className="text-sm text-slate-500">تاریخ ثبت:</span>
                                                 <span className="text-sm text-slate-700">
-                                                    {new Date(activeRequest.created_date).toLocaleDateString('fa-IR')}
+                                                    {new Date(activeRequest.created_at).toLocaleDateString('fa-IR')}
                                                 </span>
                                             </div>
                                             <div className="pt-2 border-t border-slate-200">
@@ -231,7 +234,7 @@ export default function Dashboard() {
                                             </div>
                                         </div>
                                     </div>
-                                    
+
                                     <Link to={createPageUrl("MyRequests")}>
                                         <Button variant="outline" className="w-full">
                                             مشاهده جزئیات
@@ -263,24 +266,24 @@ export default function Dashboard() {
                     </Card>
                 </motion.div>
             </div>
-            
-             {/* Recent History (Optional - simplified) */}
-             {requests.length > 1 && (
+
+            {/* Recent History (Optional - simplified) */}
+            {requests.length > 1 && (
                 <div className="mt-8">
                     <h3 className="text-lg font-semibold text-[#1e3a5f] mb-4">تاریخچه درخواست‌ها</h3>
                     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                         {requests.slice(1, 4).map((request, idx) => (
-                             <div key={request.id} className={`flex items-center justify-between p-4 ${idx !== requests.slice(1,4).length -1 ? 'border-b border-slate-100' : ''}`}>
+                            <div key={request.id} className={`flex items-center justify-between p-4 ${idx !== requests.slice(1, 4).length - 1 ? 'border-b border-slate-100' : ''}`}>
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${request.status === 'تأیید شده' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
-                                        {request.status === 'تأیید شده' ? <CheckCircle2 className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${request.status === 'APPROVED' || request.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
+                                        {request.status === 'APPROVED' || request.status === 'COMPLETED' ? <CheckCircle2 className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
                                     </div>
                                     <div>
                                         <p className="text-sm font-medium text-slate-800">
-                                             درخواست تأمین مالی
+                                            درخواست تأمین مالی
                                         </p>
                                         <p className="text-xs text-slate-500">
-                                            {new Date(request.created_date).toLocaleDateString('fa-IR')}
+                                            {new Date(request.created_at).toLocaleDateString('fa-IR')}
                                         </p>
                                     </div>
                                 </div>
@@ -289,7 +292,7 @@ export default function Dashboard() {
                                         {new Intl.NumberFormat("fa-IR").format(request.requested_amount)} <span className="text-xs font-normal text-slate-400">م.ر</span>
                                     </p>
                                     <Badge variant="outline" className="text-xs h-5 px-2 bg-slate-50">
-                                        {request.status}
+                                        {statusConfig[request.status]?.label || request.status}
                                     </Badge>
                                 </div>
                             </div>

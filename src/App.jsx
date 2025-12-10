@@ -6,6 +6,7 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import Signup from './pages/Signup'
 import CompanyProfile from './pages/CompanyProfile'
+import MyRequests from './pages/MyRequests'
 import Layout from './layouts/Layout'
 
 const queryClient = new QueryClient()
@@ -30,9 +31,9 @@ function ProtectedRoute({ children, requireCompany = false }) {
   // If user is logged in BUT has no company, redirect to /company-profile
   // UNLESS we are already there to avoid loop
   if (hasCompany === false && location.pathname !== "/company-profile") {
-      return <Navigate to="/company-profile" replace />;
+    return <Navigate to="/company-profile" replace />;
   }
-  
+
   // If requireCompany is true (e.g. for dashboard features) and we don't have it, we redirected above.
   // But strictly speaking:
   // - Dashboard: Requires Company? Maybe yes, to see requests.
@@ -80,7 +81,7 @@ function App() {
 
             <Route path="/my-requests" element={
               <ProtectedRoute>
-                <LayoutWrapper><div className="p-8">My Requests Page Placeholder</div></LayoutWrapper>
+                <LayoutWrapper><MyRequests /></LayoutWrapper>
               </ProtectedRoute>
             } />
           </Routes>
