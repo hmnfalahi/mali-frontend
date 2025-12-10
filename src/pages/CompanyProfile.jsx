@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { motion, AnimatePresence } from "framer-motion";
+import { getTodayISO } from "@/utils/jalali";
 
 import BasicInfoForm from "@/components/company/BasicInfoForm";
 import FinancialInfoForm from "@/components/company/FinancialInfoForm";
@@ -64,11 +65,11 @@ export default function CompanyProfile() {
   // Prepare payload for API
   const preparePayload = (data) => {
     const payload = { ...data };
-    
+
     const numberFields = [
       "registered_capital", "latest_net_profit", "latest_operating_profit", "latest_inventory",
       "avg_working_capital", "disclosed_fixed_assets", "insured_fixed_assets", "depreciable_assets",
-      "dev_plan_accumulated_cost", "dev_plan_remaining_cost", 
+      "dev_plan_accumulated_cost", "dev_plan_remaining_cost",
       "total_assets", "total_liabilities", "latest_cash_on_hand", "cash_from_operations",
       "cash_from_operations_2y_cumulative", "total_facilities_received", "current_facilities",
       "non_current_facilities", "defaulted_facilities_amount", "bank_financing_amount", "non_bank_financing_amount"
@@ -84,7 +85,7 @@ export default function CompanyProfile() {
       payload.dev_plan_accumulated_cost = 0;
       payload.dev_plan_remaining_cost = 0;
       if (!payload.dev_plan_estimated_end_date) {
-        payload.dev_plan_estimated_end_date = new Date().toISOString().split('T')[0];
+        payload.dev_plan_estimated_end_date = getTodayISO();
       }
     }
 
@@ -168,7 +169,7 @@ export default function CompanyProfile() {
         return;
       }
     }
-    
+
     saveMutation.mutate(formData, {
       onSuccess: async () => {
         await checkCompanyStatus();
@@ -236,14 +237,14 @@ export default function CompanyProfile() {
             <span className="text-sm font-medium text-[#1e3a5f]">{Math.round(progress)}%</span>
           </div>
           <Progress value={progress} className="h-2" />
-          
+
           {/* Steps Navigation */}
           <div className="flex justify-between mt-6">
             {steps.map((step) => {
               const Icon = step.icon;
               const isActive = currentStep === step.id;
               const isCompleted = currentStep > step.id;
-              
+
               return (
                 <button
                   key={step.id}
@@ -251,20 +252,18 @@ export default function CompanyProfile() {
                   className="flex flex-col items-center gap-2 transition-all flex-1"
                 >
                   <div
-                    className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
-                      isActive
-                        ? "bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8a] text-white shadow-lg"
-                        : isCompleted
+                    className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${isActive
+                      ? "bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8a] text-white shadow-lg"
+                      : isCompleted
                         ? "bg-emerald-100 text-emerald-600"
                         : "bg-slate-100 text-slate-400"
-                    }`}
+                      }`}
                   >
                     {isCompleted ? <Check className="w-5 h-5" /> : <Icon className="w-5 h-5" />}
                   </div>
                   <span
-                    className={`text-xs font-medium hidden md:block text-center ${
-                      isActive ? "text-[#1e3a5f]" : "text-slate-500"
-                    }`}
+                    className={`text-xs font-medium hidden md:block text-center ${isActive ? "text-[#1e3a5f]" : "text-slate-500"
+                      }`}
                   >
                     {step.title}
                   </span>

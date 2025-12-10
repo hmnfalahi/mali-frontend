@@ -2,6 +2,7 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { JalaliDatePicker } from "@/components/ui/JalaliDatePicker";
 
 export default function DevelopmentPlanForm({ data, onChange }) {
   const handleChange = (field, value) => {
@@ -64,12 +65,11 @@ export default function DevelopmentPlanForm({ data, onChange }) {
               <Label htmlFor="dev_plan_estimated_end_date">
                 تاریخ تخمینی اتمام <span className="text-red-500">*</span>
               </Label>
-              <Input
+              <JalaliDatePicker
                 id="dev_plan_estimated_end_date"
-                type="date"
                 value={data.dev_plan_estimated_end_date || ""}
-                onChange={(e) => handleChange("dev_plan_estimated_end_date", e.target.value)}
-                className="h-12"
+                onChange={(value) => handleChange("dev_plan_estimated_end_date", value)}
+                placeholder="۱۴۰۳/۱۲/۲۹"
               />
             </div>
           </div>

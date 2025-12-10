@@ -4,6 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { JalaliDatePicker } from "@/components/ui/JalaliDatePicker";
 
 export default function BasicInfoForm({ data, onChange }) {
   const handleChange = (field, value) => {
@@ -26,12 +27,11 @@ export default function BasicInfoForm({ data, onChange }) {
 
         <div className="space-y-2">
           <Label htmlFor="fiscal_year_end_date">تاریخ پایان سال مالی <span className="text-red-500">*</span></Label>
-          <Input
+          <JalaliDatePicker
             id="fiscal_year_end_date"
-            type="date"
             value={data.fiscal_year_end_date || ""}
-            onChange={(e) => handleChange("fiscal_year_end_date", e.target.value)}
-            className="h-12"
+            onChange={(value) => handleChange("fiscal_year_end_date", value)}
+            placeholder="۱۴۰۳/۱۲/۲۹"
           />
         </div>
       </div>

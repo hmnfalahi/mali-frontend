@@ -21,6 +21,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
+import { formatJalaliDate } from "@/utils/jalali";
 
 const statusConfig = {
     "DRAFT": { label: "پیش‌نویس", color: "bg-slate-100 text-slate-700 border-slate-200", icon: Clock },
@@ -223,7 +224,7 @@ export default function Dashboard() {
                                             <div className="flex justify-between">
                                                 <span className="text-sm text-slate-500">تاریخ ثبت:</span>
                                                 <span className="text-sm text-slate-700">
-                                                    {new Date(activeRequest.created_at).toLocaleDateString('fa-IR')}
+                                                    {formatJalaliDate(activeRequest.created_at)}
                                                 </span>
                                             </div>
                                             <div className="pt-2 border-t border-slate-200">
@@ -283,7 +284,7 @@ export default function Dashboard() {
                                             درخواست تأمین مالی
                                         </p>
                                         <p className="text-xs text-slate-500">
-                                            {new Date(request.created_at).toLocaleDateString('fa-IR')}
+                                            {formatJalaliDate(request.created_at)}
                                         </p>
                                     </div>
                                 </div>

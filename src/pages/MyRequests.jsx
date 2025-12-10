@@ -40,6 +40,7 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { motion, AnimatePresence } from "framer-motion";
+import { formatJalaliDate } from "@/utils/jalali";
 
 // Method choices from API
 const methodChoices = [
@@ -660,7 +661,7 @@ export default function MyRequests() {
                                                                 {getMethodLabel(request.method)}
                                                             </h3>
                                                             <p className="text-sm text-slate-500">
-                                                                {request.created_at ? new Date(request.created_at).toLocaleDateString('fa-IR') : '-'}
+                                                                {request.created_at ? formatJalaliDate(request.created_at) : '-'}
                                                             </p>
                                                         </div>
                                                     </div>
