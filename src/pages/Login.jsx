@@ -1,90 +1,457 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from "@/components/ui/card";
-import { AlertCircle } from "lucide-react";
+import { 
+    AlertCircle, 
+    Phone, 
+    KeyRound, 
+    ArrowRight, 
+    Loader2, 
+    CheckCircle2,
+    RefreshCw,
+    CreditCard
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+
+// OTP Configuration
+const OTP_LENGTH = 6;
+const RESEND_COOLDOWN = 60; // seconds
 
 export default function Login() {
-    const { login } = useAuth();
+    const { sendOTP, otpLogin, user } = useAuth();
     const navigate = useNavigate();
-    const [formData, setFormData] = useState({ phone_number: "", password: "" });
+    const location = useLocation();
+
+    // Form state
+    const [step, setStep] = useState("phone"); // 'phone' | 'otp'
+    const [phoneNumber, setPhoneNumber] = useState("");
+    const [otpCode, setOtpCode] = useState(["", "", "", "", "", ""]);
     const [error, setError] = useState("");
+    const [successMessage, setSuccessMessage] = useState("");
     const [isLoading, setIsLoading] = useState(false);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    // Countdown timer
+    const [countdown, setCountdown] = useState(0);
+    const countdownRef = useRef(null);
+
+    // OTP input refs
+    const otpInputRefs = useRef([]);
+
+    // Redirect if already logged in
+    useEffect(() => {
+        if (user) {
+            const returnUrl = new URLSearchParams(location.search).get("returnUrl");
+            navigate(returnUrl || "/dashboard", { replace: true });
+        }
+    }, [user, navigate, location]);
+
+    // Countdown timer effect
+    useEffect(() => {
+        if (countdown > 0) {
+            countdownRef.current = setTimeout(() => {
+                setCountdown(countdown - 1);
+            }, 1000);
+        }
+        return () => {
+            if (countdownRef.current) {
+                clearTimeout(countdownRef.current);
+            }
+        };
+    }, [countdown]);
+
+    // Focus first OTP input when step changes to OTP
+    useEffect(() => {
+        if (step === "otp" && otpInputRefs.current[0]) {
+            otpInputRefs.current[0].focus();
+        }
+    }, [step]);
+
+    // Normalize phone number
+    const normalizePhoneNumber = (phone) => {
+        let normalized = phone.replace(/\D/g, "");
+        if (normalized.startsWith("98")) {
+            normalized = "0" + normalized.slice(2);
+        } else if (normalized.startsWith("9") && normalized.length === 10) {
+            normalized = "0" + normalized;
+        }
+        return normalized;
+    };
+
+    // Validate phone number
+    const isValidPhoneNumber = (phone) => {
+        const normalized = normalizePhoneNumber(phone);
+        return /^09[0-9]{9}$/.test(normalized);
+    };
+
+    // Handle phone submission
+    const handleSendOTP = async (e) => {
+        e?.preventDefault();
         setError("");
+        setSuccessMessage("");
+
+        const normalized = normalizePhoneNumber(phoneNumber);
+        
+        if (!isValidPhoneNumber(normalized)) {
+            setError("شماره موبایل معتبر نیست");
+            return;
+        }
+
         setIsLoading(true);
         try {
-            await login(formData.phone_number, formData.password);
-            navigate("/dashboard");
+            const response = await sendOTP(normalized, "LOGIN");
+            if (response.success) {
+                setPhoneNumber(normalized);
+                setStep("otp");
+                setCountdown(RESEND_COOLDOWN);
+                setSuccessMessage("کد تایید ارسال شد");
+                setTimeout(() => setSuccessMessage(""), 3000);
+            } else {
+                setError(response.message || "خطا در ارسال کد تایید");
+            }
         } catch (err) {
-            setError(err.response?.data?.detail || "خطا در ورود به سیستم. لطفا مجددا تلاش کنید.");
+            const errorMsg = err.response?.data?.message || 
+                            err.response?.data?.phone_number?.[0] ||
+                            "خطا در ارسال کد تایید. لطفا مجددا تلاش کنید.";
+            setError(errorMsg);
         } finally {
             setIsLoading(false);
         }
     };
 
+    // Handle OTP input change
+    const handleOtpChange = (index, value) => {
+        // Only allow digits
+        const digit = value.replace(/\D/g, "").slice(-1);
+        
+        const newOtp = [...otpCode];
+        newOtp[index] = digit;
+        setOtpCode(newOtp);
+
+        // Auto-focus next input
+        if (digit && index < OTP_LENGTH - 1) {
+            otpInputRefs.current[index + 1]?.focus();
+        }
+
+        // Auto-submit when all digits are entered
+        if (digit && index === OTP_LENGTH - 1) {
+            const fullCode = newOtp.join("");
+            if (fullCode.length === OTP_LENGTH) {
+                handleVerifyOTP(fullCode);
+            }
+        }
+    };
+
+    // Handle OTP paste
+    const handleOtpPaste = (e) => {
+        e.preventDefault();
+        const pastedData = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, OTP_LENGTH);
+        if (pastedData.length === OTP_LENGTH) {
+            const newOtp = pastedData.split("");
+            setOtpCode(newOtp);
+            otpInputRefs.current[OTP_LENGTH - 1]?.focus();
+            handleVerifyOTP(pastedData);
+        }
+    };
+
+    // Handle OTP key down (backspace navigation)
+    const handleOtpKeyDown = (index, e) => {
+        if (e.key === "Backspace" && !otpCode[index] && index > 0) {
+            otpInputRefs.current[index - 1]?.focus();
+        }
+    };
+
+    // Handle OTP verification
+    const handleVerifyOTP = async (code) => {
+        setError("");
+        setIsLoading(true);
+
+        try {
+            const response = await otpLogin(phoneNumber, code);
+            
+            // Login successful
+            const returnUrl = new URLSearchParams(location.search).get("returnUrl");
+            
+            if (response.is_new_user) {
+                // New user - redirect to complete profile
+                navigate("/company-profile", { replace: true });
+            } else {
+                navigate(returnUrl || "/dashboard", { replace: true });
+            }
+        } catch (err) {
+            const errorMsg = err.response?.data?.message || 
+                            err.response?.data?.detail ||
+                            "کد تایید نادرست است";
+            setError(errorMsg);
+            // Clear OTP and focus first input
+            setOtpCode(["", "", "", "", "", ""]);
+            otpInputRefs.current[0]?.focus();
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Handle form submit
+    const handleOtpSubmit = (e) => {
+        e.preventDefault();
+        const code = otpCode.join("");
+        if (code.length === OTP_LENGTH) {
+            handleVerifyOTP(code);
+        } else {
+            setError("لطفا کد 6 رقمی را کامل وارد کنید");
+        }
+    };
+
+    // Resend OTP
+    const handleResendOTP = () => {
+        if (countdown > 0) return;
+        handleSendOTP();
+    };
+
+    // Go back to phone step
+    const handleBackToPhone = () => {
+        setStep("phone");
+        setOtpCode(["", "", "", "", "", ""]);
+        setError("");
+        setSuccessMessage("");
+    };
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4" dir="rtl">
-            <Card className="w-full max-w-md">
-                <CardHeader className="space-y-1">
-                    <CardTitle className="text-2xl font-bold text-center">ورود به حساب</CardTitle>
-                    <CardDescription className="text-center">
-                        برای ورود، شماره موبایل و رمز عبور خود را وارد کنید
-                    </CardDescription>
-                </CardHeader>
-                <form onSubmit={handleSubmit}>
-                    <CardContent className="space-y-4">
-                        {error && (
-                            <div className="bg-red-50 text-red-600 p-3 rounded-md text-sm flex items-center gap-2">
-                                <AlertCircle className="w-4 h-4" />
-                                {error}
-                            </div>
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4" dir="rtl">
+            <div className="w-full max-w-md">
+                {/* Logo */}
+                <div className="flex justify-center mb-8">
+                    <Link to="/" className="flex items-center gap-3">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8a] flex items-center justify-center shadow-lg">
+                            <CreditCard className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                            <h1 className="text-xl font-bold text-[#1e3a5f]">مالی</h1>
+                            <p className="text-xs text-slate-500">پلتفرم تامین مالی</p>
+                        </div>
+                    </Link>
+                </div>
+
+                <Card className="border-0 shadow-xl shadow-slate-200/50">
+                    <CardHeader className="space-y-1 pb-4">
+                        <CardTitle className="text-2xl font-bold text-center text-slate-800">
+                            ورود به حساب
+                        </CardTitle>
+                        <CardDescription className="text-center text-slate-500">
+                            {step === "phone" 
+                                ? "شماره موبایل خود را وارد کنید" 
+                                : `کد تایید ارسال شده به ${phoneNumber} را وارد کنید`
+                            }
+                        </CardDescription>
+                    </CardHeader>
+
+                    <AnimatePresence mode="wait">
+                        {step === "phone" ? (
+                            <motion.div
+                                key="phone"
+                                initial={{ opacity: 0, x: -20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: 20 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <form onSubmit={handleSendOTP}>
+                                    <CardContent className="space-y-4">
+                                        {/* Error Message */}
+                                        {error && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="bg-red-50 text-red-600 p-3 rounded-xl text-sm flex items-center gap-2 border border-red-100"
+                                            >
+                                                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                                                {error}
+                                            </motion.div>
+                                        )}
+
+                                        {/* Phone Input */}
+                                        <div className="space-y-2">
+                                            <Label htmlFor="phone" className="flex items-center gap-2">
+                                                <Phone className="w-4 h-4 text-slate-400" />
+                                                شماره موبایل
+                                            </Label>
+                                            <Input
+                                                id="phone"
+                                                type="tel"
+                                                inputMode="numeric"
+                                                placeholder="09123456789"
+                                                value={phoneNumber}
+                                                onChange={(e) => setPhoneNumber(e.target.value.replace(/\D/g, ""))}
+                                                className="h-12 text-lg text-left font-mono tracking-wider"
+                                                dir="ltr"
+                                                maxLength={11}
+                                                autoFocus
+                                                required
+                                            />
+                                            <p className="text-xs text-slate-400">
+                                                کد تایید به این شماره پیامک خواهد شد
+                                            </p>
+                                        </div>
+                                    </CardContent>
+
+                                    <CardFooter className="flex flex-col gap-4">
+                                        <Button 
+                                            type="submit"
+                                            className="w-full h-12 bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] text-base"
+                                            disabled={isLoading || !phoneNumber}
+                                        >
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="w-5 h-5 animate-spin ml-2" />
+                                                    در حال ارسال...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    دریافت کد تایید
+                                                    <ArrowRight className="w-5 h-5 mr-2 rotate-180" />
+                                                </>
+                                            )}
+                                        </Button>
+
+                                        <div className="text-center text-sm text-slate-500">
+                                            با ورود، شما{" "}
+                                            <Link to="/terms" className="text-[#1e3a5f] hover:underline">
+                                                قوانین و مقررات
+                                            </Link>
+                                            {" "}را می‌پذیرید.
+                                        </div>
+                                    </CardFooter>
+                                </form>
+                            </motion.div>
+                        ) : (
+                            <motion.div
+                                key="otp"
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                exit={{ opacity: 0, x: -20 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <form onSubmit={handleOtpSubmit}>
+                                    <CardContent className="space-y-6">
+                                        {/* Success Message */}
+                                        {successMessage && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="bg-emerald-50 text-emerald-600 p-3 rounded-xl text-sm flex items-center gap-2 border border-emerald-100"
+                                            >
+                                                <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                                                {successMessage}
+                                            </motion.div>
+                                        )}
+
+                                        {/* Error Message */}
+                                        {error && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: -10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="bg-red-50 text-red-600 p-3 rounded-xl text-sm flex items-center gap-2 border border-red-100"
+                                            >
+                                                <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                                                {error}
+                                            </motion.div>
+                                        )}
+
+                                        {/* OTP Input */}
+                                        <div className="space-y-3">
+                                            <Label className="flex items-center gap-2 justify-center">
+                                                <KeyRound className="w-4 h-4 text-slate-400" />
+                                                کد تایید 6 رقمی
+                                            </Label>
+                                            <div className="flex gap-2 justify-center" dir="ltr">
+                                                {otpCode.map((digit, index) => (
+                                                    <Input
+                                                        key={index}
+                                                        ref={(el) => (otpInputRefs.current[index] = el)}
+                                                        type="text"
+                                                        inputMode="numeric"
+                                                        maxLength={1}
+                                                        value={digit}
+                                                        onChange={(e) => handleOtpChange(index, e.target.value)}
+                                                        onKeyDown={(e) => handleOtpKeyDown(index, e)}
+                                                        onPaste={index === 0 ? handleOtpPaste : undefined}
+                                                        className="w-12 h-14 text-center text-xl font-bold"
+                                                        disabled={isLoading}
+                                                    />
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        {/* Countdown / Resend */}
+                                        <div className="text-center">
+                                            {countdown > 0 ? (
+                                                <p className="text-sm text-slate-500">
+                                                    ارسال مجدد کد تا{" "}
+                                                    <span className="font-bold text-[#1e3a5f]">{countdown}</span>
+                                                    {" "}ثانیه دیگر
+                                                </p>
+                                            ) : (
+                                                <button
+                                                    type="button"
+                                                    onClick={handleResendOTP}
+                                                    disabled={isLoading}
+                                                    className="text-sm text-[#1e3a5f] hover:underline flex items-center gap-1 mx-auto"
+                                                >
+                                                    <RefreshCw className="w-4 h-4" />
+                                                    ارسال مجدد کد
+                                                </button>
+                                            )}
+                                        </div>
+                                    </CardContent>
+
+                                    <CardFooter className="flex flex-col gap-3">
+                                        <Button 
+                                            type="submit"
+                                            className="w-full h-12 bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] text-base"
+                                            disabled={isLoading || otpCode.join("").length !== OTP_LENGTH}
+                                        >
+                                            {isLoading ? (
+                                                <>
+                                                    <Loader2 className="w-5 h-5 animate-spin ml-2" />
+                                                    در حال تایید...
+                                                </>
+                                            ) : (
+                                                <>
+                                                    <CheckCircle2 className="w-5 h-5 ml-2" />
+                                                    تایید و ورود
+                                                </>
+                                            )}
+                                        </Button>
+
+                                        <Button
+                                            type="button"
+                                            variant="ghost"
+                                            onClick={handleBackToPhone}
+                                            disabled={isLoading}
+                                            className="w-full text-slate-500"
+                                        >
+                                            <ArrowRight className="w-4 h-4 ml-2" />
+                                            تغییر شماره موبایل
+                                        </Button>
+                                    </CardFooter>
+                                </form>
+                            </motion.div>
                         )}
-                        <div className="space-y-2">
-                            <Label htmlFor="phone">شماره موبایل</Label>
-                            <Input
-                                id="phone"
-                                type="tel"
-                                placeholder="0912..."
-                                value={formData.phone_number}
-                                onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
-                                required
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="password">رمز عبور</Label>
-                                <Link className="text-sm text-primary hover:underline" to="#">
-                                    فراموشی رمز عبور؟
-                                </Link>
-                            </div>
-                            <Input
-                                id="password"
-                                type="password"
-                                value={formData.password}
-                                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                required
-                            />
-                        </div>
-                    </CardContent>
-                    <CardFooter className="flex flex-col gap-4">
-                        <Button className="w-full" type="submit" disabled={isLoading}>
-                            {isLoading ? "در حال ورود..." : "ورود"}
-                        </Button>
-                        <div className="text-center text-sm text-slate-600">
-                            حساب کاربری ندارید؟{" "}
-                            <Link to="/signup" className="text-primary hover:underline font-medium">
-                                ثبت‌نام کنید
-                            </Link>
-                        </div>
-                    </CardFooter>
-                </form>
-            </Card>
+                    </AnimatePresence>
+                </Card>
+
+                {/* Back to Home */}
+                <div className="mt-6 text-center">
+                    <Link 
+                        to="/" 
+                        className="text-sm text-slate-500 hover:text-[#1e3a5f] transition-colors"
+                    >
+                        بازگشت به صفحه اصلی
+                    </Link>
+                </div>
+            </div>
         </div>
     );
 }

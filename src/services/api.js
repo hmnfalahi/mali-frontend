@@ -1,4 +1,10 @@
 import api from "@/lib/axios";
+import axios from "axios";
+
+// Base axios instance for unauthenticated requests
+const publicApi = axios.create({
+    baseURL: import.meta.env.VITE_API_URL,
+});
 
 // Refactored to use real API
 export const apiService = {
@@ -15,6 +21,48 @@ export const apiService = {
         },
         redirectToLogin: (returnUrl) => {
             window.location.href = `/login?returnUrl=${encodeURIComponent(returnUrl || window.location.pathname)}`;
+        },
+        // OTP endpoints
+        otp: {
+            /**
+             * Send OTP code to phone number
+             * @param {string} phone_number - Iranian phone number
+             * @param {string} purpose - 'LOGIN' | 'SIGNUP' | 'PASSWORD_RESET'
+             */
+            send: async (phone_number, purpose = 'LOGIN') => {
+                const response = await publicApi.post("/users/otp/send/", { 
+                    phone_number, 
+                    purpose 
+                });
+                return response.data;
+            },
+            /**
+             * Verify OTP code (without login)
+             * @param {string} phone_number - Iranian phone number
+             * @param {string} code - 6-digit OTP code
+             * @param {string} purpose - 'LOGIN' | 'SIGNUP' | 'PASSWORD_RESET'
+             */
+            verify: async (phone_number, code, purpose = 'LOGIN') => {
+                const response = await publicApi.post("/users/otp/verify/", { 
+                    phone_number, 
+                    code, 
+                    purpose 
+                });
+                return response.data;
+            },
+            /**
+             * Login using OTP code
+             * @param {string} phone_number - Iranian phone number
+             * @param {string} code - 6-digit OTP code
+             * @returns {{ access: string, refresh: string, is_new_user: boolean }}
+             */
+            login: async (phone_number, code) => {
+                const response = await publicApi.post("/users/otp/login/", { 
+                    phone_number, 
+                    code 
+                });
+                return response.data;
+            }
         }
     },
     entities: {

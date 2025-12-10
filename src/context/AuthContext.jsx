@@ -8,6 +8,7 @@ export function AuthProvider({ children }) {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [hasCompany, setHasCompany] = useState(null); // null: unknown, true/false
+    const [companyId, setCompanyId] = useState(null);
 
     // Load user on mount
     useEffect(() => {
@@ -30,13 +31,19 @@ export function AuthProvider({ children }) {
                 try {
                     const companies = await apiService.entities.Company.list({ created_by: userData.phone_number });
                     setHasCompany(companies.length > 0);
+                    if (companies.length > 0) {
+                        setCompanyId(companies[0].id);
+                    }
                 } catch (err) {
                     console.error("Failed to check company status", err);
-                    setHasCompany(false); // Default to false if check fails, maybe not ideal but safe?
+                    setHasCompany(false);
                 }
 
             } catch (error) {
                 console.log("Failed to fetch user", error);
+                // Clear invalid tokens
+                localStorage.removeItem("access_token");
+                localStorage.removeItem("refresh_token");
             } finally {
                 setLoading(false);
             }
@@ -45,12 +52,8 @@ export function AuthProvider({ children }) {
         loadUser();
     }, []);
 
-    const login = async (phone_number, password) => {
-        const response = await api.post("/users/login/", { phone_number, password });
-        localStorage.setItem("access_token", response.data.access);
-        localStorage.setItem("refresh_token", response.data.refresh);
-
-        // After login, fetch user details & company status
+    // Helper to fetch user details after login
+    const fetchUserAndCompany = async (phone_number) => {
         try {
             const userResp = await api.get("/users/me/");
             const userData = userResp.data;
@@ -58,11 +61,41 @@ export function AuthProvider({ children }) {
             
             const companies = await apiService.entities.Company.list({ created_by: userData.phone_number });
             setHasCompany(companies.length > 0);
+            if (companies.length > 0) {
+                setCompanyId(companies[0].id);
+            }
         } catch (e) {
             setUser({ phone_number });
             setHasCompany(false);
         }
+    };
+
+    // Traditional login with password
+    const login = async (phone_number, password) => {
+        const response = await api.post("/users/login/", { phone_number, password });
+        localStorage.setItem("access_token", response.data.access);
+        localStorage.setItem("refresh_token", response.data.refresh);
+        await fetchUserAndCompany(phone_number);
         return response.data;
+    };
+
+    // OTP Login (passwordless)
+    const otpLogin = async (phone_number, code) => {
+        const response = await apiService.auth.otp.login(phone_number, code);
+        localStorage.setItem("access_token", response.access);
+        localStorage.setItem("refresh_token", response.refresh);
+        await fetchUserAndCompany(phone_number);
+        return response;
+    };
+
+    // Send OTP code
+    const sendOTP = async (phone_number, purpose = 'LOGIN') => {
+        return await apiService.auth.otp.send(phone_number, purpose);
+    };
+
+    // Verify OTP code (without login)
+    const verifyOTP = async (phone_number, code, purpose = 'LOGIN') => {
+        return await apiService.auth.otp.verify(phone_number, code, purpose);
     };
 
     const signup = async (data) => {
@@ -75,6 +108,7 @@ export function AuthProvider({ children }) {
         localStorage.removeItem("refresh_token");
         setUser(null);
         setHasCompany(null);
+        setCompanyId(null);
         window.location.href = "/login";
     };
     
@@ -84,13 +118,28 @@ export function AuthProvider({ children }) {
         try {
             const companies = await apiService.entities.Company.list({ created_by: user.phone_number });
             setHasCompany(companies.length > 0);
+            if (companies.length > 0) {
+                setCompanyId(companies[0].id);
+            }
         } catch (e) {
              console.error("Failed to re-check company status", e);
         }
     };
 
     return (
-        <AuthContext.Provider value={{ user, login, signup, logout, loading, hasCompany, checkCompanyStatus }}>
+        <AuthContext.Provider value={{ 
+            user, 
+            login, 
+            otpLogin,
+            sendOTP,
+            verifyOTP,
+            signup, 
+            logout, 
+            loading, 
+            hasCompany, 
+            companyId,
+            checkCompanyStatus 
+        }}>
             {!loading && children}
         </AuthContext.Provider>
     );
