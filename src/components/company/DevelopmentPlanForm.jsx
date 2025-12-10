@@ -17,7 +17,7 @@ export default function DevelopmentPlanForm({ data, onChange }) {
 
   const formatNumber = (value) => {
     if (!value && value !== 0) return "";
-    return new Intl.NumberFormat("fa-IR").format(value);
+    return new Intl.NumberFormat("en-US").format(value);
   };
 
   const hasPlan = data.has_development_plan || false;
@@ -69,7 +69,7 @@ export default function DevelopmentPlanForm({ data, onChange }) {
                 id="dev_plan_estimated_end_date"
                 value={data.dev_plan_estimated_end_date || ""}
                 onChange={(value) => handleChange("dev_plan_estimated_end_date", value)}
-                placeholder="۱۴۰۳/۱۲/۲۹"
+                placeholder="انتخاب تاریخ"
               />
             </div>
           </div>

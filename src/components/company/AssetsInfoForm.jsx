@@ -11,7 +11,7 @@ export default function AssetsInfoForm({ data, onChange }) {
 
   const formatNumber = (value) => {
     if (!value && value !== 0) return "";
-    return new Intl.NumberFormat("fa-IR").format(value);
+    return new Intl.NumberFormat("en-US").format(value);
   };
 
   const renderNumberInput = (id, label, placeholder, required = true) => (
@@ -68,7 +68,7 @@ export default function AssetsInfoForm({ data, onChange }) {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {renderNumberInput("latest_cash_on_hand", "موجودی نقد و بانک", "مثال: 50000000")}
           {renderNumberInput("cash_from_operations", "جریان نقد حاصل از عملیات", "مثال: 60000000")}
-          {renderNumberInput("cash_from_operations_2y_cumulative", "جریان نقد عملیاتی (تجمعی ۲ سال)", "مثال: 110000000")}
+          {renderNumberInput("cash_from_operations_2y_cumulative", "جریان نقد عملیاتی (تجمعی 2 سال)", "مثال: 110000000")}
         </div>
       </div>
     </div>

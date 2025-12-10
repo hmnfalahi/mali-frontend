@@ -46,13 +46,13 @@ export default function BasicInfoForm({ data, onChange }) {
             inputMode="numeric"
             value={data.national_id || ""}
             onChange={(e) => handleNationalIdChange(e.target.value)}
-            placeholder="۱۱ رقمی (مثال: 10123456789)"
+            placeholder="11 رقمی (مثال: 10123456789)"
             className="h-12 text-left font-mono"
             dir="ltr"
             maxLength={11}
           />
           {data.national_id && data.national_id.length !== 11 && (
-            <p className="text-xs text-amber-600">شناسه ملی باید ۱۱ رقم باشد ({data.national_id.length}/۱۱)</p>
+            <p className="text-xs text-amber-600">شناسه ملی باید 11 رقم باشد ({data.national_id.length}/11)</p>
           )}
         </div>
       </div>
@@ -133,7 +133,7 @@ export default function BasicInfoForm({ data, onChange }) {
       <div className="flex items-center justify-between p-4 rounded-xl bg-slate-50">
         <div>
           <Label className="text-base">صورت‌های مالی میان‌دوره‌ای</Label>
-          <p className="text-sm text-slate-500 mt-1">آیا شرکت صورتهای مالی حسابرسی شده میان‌دوره‌ای (۳ یا ۶ ماهه) تهیه می‌کند؟</p>
+          <p className="text-sm text-slate-500 mt-1">آیا شرکت صورتهای مالی حسابرسی شده میان‌دوره‌ای (3 یا 6 ماهه) تهیه می‌کند؟</p>
         </div>
         <Switch
           checked={data.prepares_interim_fs || false}

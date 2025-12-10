@@ -16,7 +16,7 @@ export default function LoansInfoForm({ data, onChange }) {
 
   const formatNumber = (value) => {
     if (!value && value !== 0) return "";
-    return new Intl.NumberFormat("fa-IR").format(value);
+    return new Intl.NumberFormat("en-US").format(value);
   };
 
   const renderNumberInput = (id, label, placeholder, required = true) => (

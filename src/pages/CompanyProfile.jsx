@@ -125,7 +125,7 @@ export default function CompanyProfile() {
       case 1:
         if (!formData.title) return "نام شرکت الزامی است";
         if (!formData.national_id) return "شناسه ملی الزامی است";
-        if (formData.national_id && formData.national_id.length !== 11) return "شناسه ملی باید ۱۱ رقم باشد";
+        if (formData.national_id && formData.national_id.length !== 11) return "شناسه ملی باید 11 رقم باشد";
         if (!formData.personnel_count) return "تعداد پرسنل الزامی است";
         if (!formData.activity_subject) return "موضوع فعالیت الزامی است";
         if (!formData.fiscal_year_end_date) return "تاریخ پایان سال مالی الزامی است";

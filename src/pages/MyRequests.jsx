@@ -438,7 +438,7 @@ export default function MyRequests() {
                                             type="number"
                                             value={formData.repayment_period_months}
                                             onChange={(e) => setFormData({ ...formData, repayment_period_months: e.target.value })}
-                                            placeholder="مثلاً ۲۴ ماه"
+                                            placeholder="مثلا 24 ماه"
                                             className="text-left dir-ltr"
                                         />
                                     </div>
@@ -472,7 +472,7 @@ export default function MyRequests() {
                                             step="0.01"
                                             value={formData.proposed_interest_rate}
                                             onChange={(e) => setFormData({ ...formData, proposed_interest_rate: e.target.value })}
-                                            placeholder="مثلاً ۱۸"
+                                            placeholder="مثلا 18"
                                             className="text-left dir-ltr"
                                         />
                                     </div>
@@ -675,7 +675,7 @@ export default function MyRequests() {
                                                         <p className="text-xs text-slate-400 mb-1">مبلغ درخواستی</p>
                                                         <p className="font-bold text-[#1e3a5f]">
                                                             {request.requested_amount
-                                                                ? new Intl.NumberFormat("fa-IR").format(request.requested_amount)
+                                                                ? new Intl.NumberFormat("en-US").format(request.requested_amount)
                                                                 : "-"}
                                                             <span className="text-xs font-normal text-slate-400 mr-1">ریال</span>
                                                         </p>
@@ -707,7 +707,7 @@ export default function MyRequests() {
                                                             <div>
                                                                 <p className="text-xs text-emerald-600 mb-1">مبلغ تایید شده</p>
                                                                 <p className="font-bold text-emerald-700">
-                                                                    {new Intl.NumberFormat("fa-IR").format(request.approved_amount)} ریال
+                                                                    {new Intl.NumberFormat("en-US").format(request.approved_amount)} ریال
                                                                 </p>
                                                             </div>
                                                             {request.approved_interest_rate && (

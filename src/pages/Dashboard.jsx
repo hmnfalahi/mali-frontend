@@ -145,7 +145,7 @@ export default function Dashboard() {
                                         <div>
                                             <p className="text-xs text-slate-400 mb-1">سرمایه ثبت شده</p>
                                             <p className="font-medium text-slate-700">
-                                                {company.registered_capital ? new Intl.NumberFormat("fa-IR").format(company.registered_capital) : "-"} <span className="text-xs text-slate-400">ریال</span>
+                                                {company.registered_capital ? new Intl.NumberFormat("en-US").format(company.registered_capital) : "-"} <span className="text-xs text-slate-400">ریال</span>
                                             </p>
                                         </div>
                                         <div>
@@ -155,7 +155,7 @@ export default function Dashboard() {
                                         <div>
                                             <p className="text-xs text-slate-400 mb-1">سود خالص (آخرین دوره)</p>
                                             <p className="font-medium text-slate-700">
-                                                {company.latest_net_profit ? new Intl.NumberFormat("fa-IR").format(company.latest_net_profit) : "-"} <span className="text-xs text-slate-400">ریال</span>
+                                                {company.latest_net_profit ? new Intl.NumberFormat("en-US").format(company.latest_net_profit) : "-"} <span className="text-xs text-slate-400">ریال</span>
                                             </p>
                                         </div>
                                         <div>
@@ -218,7 +218,7 @@ export default function Dashboard() {
                                             <div className="flex justify-between">
                                                 <span className="text-sm text-slate-500">مبلغ درخواستی:</span>
                                                 <span className="font-bold text-[#1e3a5f]">
-                                                    {new Intl.NumberFormat("fa-IR").format(activeRequest.requested_amount)} <span className="text-xs font-normal">م.ر</span>
+                                                    {new Intl.NumberFormat("en-US").format(activeRequest.requested_amount)} <span className="text-xs font-normal">ریال</span>
                                                 </span>
                                             </div>
                                             <div className="flex justify-between">
@@ -290,7 +290,7 @@ export default function Dashboard() {
                                 </div>
                                 <div className="text-left">
                                     <p className="text-sm font-bold text-slate-700">
-                                        {new Intl.NumberFormat("fa-IR").format(request.requested_amount)} <span className="text-xs font-normal text-slate-400">م.ر</span>
+                                        {new Intl.NumberFormat("en-US").format(request.requested_amount)} <span className="text-xs font-normal text-slate-400">ریال</span>
                                     </p>
                                     <Badge variant="outline" className="text-xs h-5 px-2 bg-slate-50">
                                         {statusConfig[request.status]?.label || request.status}

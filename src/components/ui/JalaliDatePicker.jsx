@@ -9,7 +9,6 @@ import {
     getJalaliMonthNames,
     getCurrentJalaliDate,
     isValidJalaliDate,
-    toPersianDigits,
     toEnglishDigits,
     parseJalaliToISO,
     isoToJalaliInput
@@ -260,7 +259,7 @@ export function JalaliDatePicker({
                         }
                     `}
                 >
-                    {toPersianDigits(day)}
+                    {day}
                 </button>
             );
         }
@@ -304,7 +303,7 @@ export function JalaliDatePicker({
             {/* Validation error */}
             {!isValid && (
                 <p className="text-xs text-red-500 mt-1 text-right">
-                    فرمت تاریخ نامعتبر است (مثال: ۱۴۰۳/۰۹/۲۰)
+                    فرمت تاریخ نامعتبر است (مثال: 1403/09/20)
                 </p>
             )}
 
@@ -329,7 +328,7 @@ export function JalaliDatePicker({
                                     <ChevronRight className="w-5 h-5" />
                                     <ChevronRight className="w-5 h-5 -mr-3" />
                                 </button>
-                                <span className="text-lg font-bold">{toPersianDigits(viewYear)}</span>
+                                <span className="text-lg font-bold">{viewYear}</span>
                                 <button
                                     type="button"
                                     onClick={goToPreviousYear}

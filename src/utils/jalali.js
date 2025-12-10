@@ -50,10 +50,10 @@ export function jalaliToGregorian(jy, jm, jd) {
 /**
  * Format a Gregorian date string as Jalali date for display
  * @param {string} gregorianDateString - Date in ISO format
- * @param {boolean} usePerisanDigits - Use Persian numerals (۰-۹) instead of Arabic (0-9)
- * @returns {string} Formatted Jalali date (e.g., "۱۴۰۳/۰۹/۲۰" or "1403/09/20")
+ * @param {boolean} usePersianDigits - Use Persian numerals (۰-۹) instead of Latin (0-9)
+ * @returns {string} Formatted Jalali date (e.g., "1403/09/20")
  */
-export function formatJalaliDate(gregorianDateString, usePersianDigits = true) {
+export function formatJalaliDate(gregorianDateString, usePersianDigits = false) {
     const jalali = gregorianToJalali(gregorianDateString);
     if (!jalali) return '-';
 
@@ -70,9 +70,9 @@ export function formatJalaliDate(gregorianDateString, usePersianDigits = true) {
  * Format a Gregorian datetime string as Jalali date and time for display
  * @param {string} gregorianDateTimeString - DateTime in ISO format
  * @param {boolean} usePersianDigits - Use Persian numerals
- * @returns {string} Formatted Jalali datetime (e.g., "۱۴۰۳/۰۹/۲۰ ۱۲:۳۰")
+ * @returns {string} Formatted Jalali datetime (e.g., "1403/09/20 12:30")
  */
-export function formatJalaliDateTime(gregorianDateTimeString, usePersianDigits = true) {
+export function formatJalaliDateTime(gregorianDateTimeString, usePersianDigits = false) {
     if (!gregorianDateTimeString) return '-';
 
     const dateStr = formatJalaliDate(gregorianDateTimeString, usePersianDigits);

@@ -37,20 +37,20 @@ export default function Home() {
         {
             icon: Zap,
             title: "فرآیند سریع",
-            description: "پاسخ‌گویی در کمتر از ۴۸ ساعت",
-            highlight: "۴۸ ساعت"
+            description: "پاسخ‌گویی در کمتر از 48 ساعت",
+            highlight: "48 ساعت"
         },
         {
             icon: Shield,
             title: "امنیت بالا",
             description: "رمزنگاری پیشرفته و حفاظت کامل",
-            highlight: "۱۰۰٪"
+            highlight: "100%"
         },
         {
             icon: Users,
             title: "مشاوره تخصصی",
-            description: "تیم کارشناسان با بیش از ۱۰ سال تجربه",
-            highlight: "۱۰+ سال"
+            description: "تیم کارشناسان با بیش از 10 سال تجربه",
+            highlight: "10+ سال"
         },
         {
             icon: BarChart3,
@@ -85,36 +85,36 @@ export default function Home() {
     ];
 
     const stats = [
-        { number: "۵۰۰+", label: "شرکت متقاضی", icon: Building2, suffix: "شرکت" },
-        { number: "۱۰.۰۰۰", label: "میلیارد ریال تأمین مالی", icon: Wallet, suffix: "میلیارد ریال" },
-        { number: "۹۵٪", label: "رضایت مشتریان", icon: Award, suffix: "" },
-        { number: "۴۸", label: "ساعت پاسخ‌گویی", icon: Clock, suffix: "ساعت" },
+        { number: "500+", label: "شرکت متقاضی", icon: Building2, suffix: "شرکت" },
+        { number: "10,000", label: "میلیارد ریال تأمین مالی", icon: Wallet, suffix: "میلیارد ریال" },
+        { number: "95%", label: "رضایت مشتریان", icon: Award, suffix: "" },
+        { number: "48", label: "ساعت پاسخ‌گویی", icon: Clock, suffix: "ساعت" },
     ];
 
     const steps = [
         {
-            number: "۱",
+            number: "1",
             title: "ثبت‌نام رایگان",
-            desc: "در کمتر از ۲ دقیقه حساب کاربری ایجاد کنید",
-            time: "۲ دقیقه"
+            desc: "در کمتر از 2 دقیقه حساب کاربری ایجاد کنید",
+            time: "2 دقیقه"
         },
         {
-            number: "۲",
+            number: "2",
             title: "تکمیل اطلاعات",
             desc: "اطلاعات شرکت و مستندات مالی را بارگذاری کنید",
-            time: "۱۵ دقیقه"
+            time: "15 دقیقه"
         },
         {
-            number: "۳",
+            number: "3",
             title: "انتخاب روش",
             desc: "روش مناسب تأمین مالی را با مشاوره کارشناسان انتخاب کنید",
-            time: "۲۴ ساعت"
+            time: "24 ساعت"
         },
         {
-            number: "۴",
+            number: "4",
             title: "دریافت تأمین مالی",
             desc: "پس از بررسی و تأیید، تأمین مالی را دریافت کنید",
-            time: "۷-۳۰ روز"
+            time: "7-30 روز"
         },
     ];
 
@@ -548,7 +548,7 @@ export default function Home() {
                             <ul className="space-y-3 text-sm text-slate-400">
                                 <li className="flex items-center gap-2">
                                     <Phone className="w-4 h-4" />
-                                    ۰۲۱-۸۸۸۸۸۸۸۸
+                                    021-88888888
                                 </li>
                                 <li className="flex items-center gap-2">
                                     <Mail className="w-4 h-4" />
@@ -563,7 +563,7 @@ export default function Home() {
                     </div>
 
                     <div className="border-t border-slate-800 pt-6 flex flex-col sm:flex-row justify-between items-center gap-4 text-sm text-slate-400">
-                        <p>© ۱۴۰۳ مالی. تمامی حقوق محفوظ است.</p>
+                        <p>© 1403 مالی. تمامی حقوق محفوظ است.</p>
                         <div className="flex gap-4">
                             <a href="#" className="hover:text-white transition-colors">قوانین و مقررات</a>
                             <a href="#" className="hover:text-white transition-colors">حریم خصوصی</a>
