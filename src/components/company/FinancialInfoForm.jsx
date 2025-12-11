@@ -2,7 +2,7 @@ import React from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-export default function FinancialInfoForm({ data, onChange }) {
+export default function FinancialInfoForm({ data, onChange, errors = {} }) {
   const handleChange = (field, value) => {
     // Allow empty string or valid numbers (including negative for profit/loss)
     if (value === "" || /^-?\d*$/.test(value)) {
@@ -28,18 +28,20 @@ export default function FinancialInfoForm({ data, onChange }) {
           value={data[id] || ""}
           onChange={(e) => handleChange(id, e.target.value)}
           placeholder={placeholder}
-          className="h-12 text-left font-mono pl-16"
+          className={`h-12 text-left font-mono pl-16 ${errors[id] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
           dir="ltr"
         />
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
           ریال
         </span>
       </div>
-      {data[id] && (
+      {errors[id] ? (
+        <p className="text-xs text-red-500">{errors[id]}</p>
+      ) : data[id] ? (
         <p className="text-xs text-slate-500 text-right">
           {formatNumber(data[id])} ریال
         </p>
-      )}
+      ) : null}
     </div>
   );
 

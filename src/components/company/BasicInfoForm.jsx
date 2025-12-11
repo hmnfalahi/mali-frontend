@@ -6,7 +6,7 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { JalaliDatePicker } from "@/components/ui/JalaliDatePicker";
 
-export default function BasicInfoForm({ data, onChange }) {
+export default function BasicInfoForm({ data, onChange, errors = {} }) {
   const handleChange = (field, value) => {
     onChange({ ...data, [field]: value });
   };
@@ -34,8 +34,11 @@ export default function BasicInfoForm({ data, onChange }) {
             value={data.title || ""}
             onChange={(e) => handleChange("title", e.target.value)}
             placeholder="نام شرکت را وارد کنید"
-            className="h-12"
+            className={`h-12 ${errors.title ? "border-red-500 focus-visible:ring-red-500" : ""}`}
           />
+          {errors.title && (
+            <p className="text-xs text-red-500">{errors.title}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -47,13 +50,15 @@ export default function BasicInfoForm({ data, onChange }) {
             value={data.national_id || ""}
             onChange={(e) => handleNationalIdChange(e.target.value)}
             placeholder="11 رقمی (مثال: 10123456789)"
-            className="h-12 text-left font-mono"
+            className={`h-12 text-left font-mono ${errors.national_id ? "border-red-500 focus-visible:ring-red-500" : ""}`}
             dir="ltr"
             maxLength={11}
           />
-          {data.national_id && data.national_id.length !== 11 && (
+          {errors.national_id ? (
+            <p className="text-xs text-red-500">{errors.national_id}</p>
+          ) : data.national_id && data.national_id.length !== 11 ? (
             <p className="text-xs text-amber-600">شناسه ملی باید 11 رقم باشد ({data.national_id.length}/11)</p>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -68,13 +73,16 @@ export default function BasicInfoForm({ data, onChange }) {
               value={data.personnel_count || ""}
               onChange={(e) => handlePersonnelCountChange(e.target.value)}
               placeholder="مثال: 50"
-              className="h-12 text-left font-mono pl-12"
+              className={`h-12 text-left font-mono pl-12 ${errors.personnel_count ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               dir="ltr"
             />
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
               نفر
             </span>
           </div>
+          {errors.personnel_count && (
+            <p className="text-xs text-red-500">{errors.personnel_count}</p>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -84,7 +92,11 @@ export default function BasicInfoForm({ data, onChange }) {
             value={data.fiscal_year_end_date || ""}
             onChange={(value) => handleChange("fiscal_year_end_date", value)}
             placeholder="انتخاب تاریخ"
+            className={errors.fiscal_year_end_date ? "border-red-500 focus-visible:ring-red-500" : ""}
           />
+          {errors.fiscal_year_end_date && (
+            <p className="text-xs text-red-500">{errors.fiscal_year_end_date}</p>
+          )}
         </div>
       </div>
 
@@ -95,8 +107,11 @@ export default function BasicInfoForm({ data, onChange }) {
           value={data.activity_subject || ""}
           onChange={(e) => handleChange("activity_subject", e.target.value)}
           placeholder="موضوع فعالیت شرکت را شرح دهید (مثال: تولید نرم‌افزار، ساختمان‌سازی و...)"
-          className="min-h-[100px]"
+          className={`min-h-[100px] ${errors.activity_subject ? "border-red-500 focus-visible:ring-red-500" : ""}`}
         />
+        {errors.activity_subject && (
+          <p className="text-xs text-red-500">{errors.activity_subject}</p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -117,7 +132,7 @@ export default function BasicInfoForm({ data, onChange }) {
             value={data.audit_opinion_status || ""}
             onValueChange={(value) => handleChange("audit_opinion_status", value)}
           >
-            <SelectTrigger className="h-12">
+            <SelectTrigger className={`h-12 ${errors.audit_opinion_status ? "border-red-500 focus:ring-red-500" : ""}`}>
               <SelectValue placeholder="انتخاب کنید" />
             </SelectTrigger>
             <SelectContent>
@@ -127,6 +142,9 @@ export default function BasicInfoForm({ data, onChange }) {
               <SelectItem value="عدم اظهارنظر">عدم اظهارنظر</SelectItem>
             </SelectContent>
           </Select>
+          {errors.audit_opinion_status && (
+            <p className="text-xs text-red-500">{errors.audit_opinion_status}</p>
+          )}
         </div>
       </div>
 

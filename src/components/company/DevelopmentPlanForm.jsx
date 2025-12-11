@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { JalaliDatePicker } from "@/components/ui/JalaliDatePicker";
 
-export default function DevelopmentPlanForm({ data, onChange }) {
+export default function DevelopmentPlanForm({ data, onChange, errors = {} }) {
   const handleChange = (field, value) => {
     onChange({ ...data, [field]: value });
   };
@@ -52,13 +52,16 @@ export default function DevelopmentPlanForm({ data, onChange }) {
                   value={data.dev_plan_progress_percent || ""}
                   onChange={(e) => handleNumberChange("dev_plan_progress_percent", e.target.value)}
                   placeholder="مثال: 50.5"
-                  className="h-12 text-left font-mono pl-12"
+                  className={`h-12 text-left font-mono pl-12 ${errors.dev_plan_progress_percent ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                   dir="ltr"
                 />
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400">
                   %
                 </span>
               </div>
+              {errors.dev_plan_progress_percent && (
+                <p className="text-xs text-red-500">{errors.dev_plan_progress_percent}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -70,7 +73,11 @@ export default function DevelopmentPlanForm({ data, onChange }) {
                 value={data.dev_plan_estimated_end_date || ""}
                 onChange={(value) => handleChange("dev_plan_estimated_end_date", value)}
                 placeholder="انتخاب تاریخ"
+                className={errors.dev_plan_estimated_end_date ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
+              {errors.dev_plan_estimated_end_date && (
+                <p className="text-xs text-red-500">{errors.dev_plan_estimated_end_date}</p>
+              )}
             </div>
           </div>
 
@@ -87,18 +94,20 @@ export default function DevelopmentPlanForm({ data, onChange }) {
                   value={data.dev_plan_accumulated_cost || ""}
                   onChange={(e) => handleNumberChange("dev_plan_accumulated_cost", e.target.value)}
                   placeholder="مثال: 100000000"
-                  className="h-12 text-left font-mono pl-16"
+                  className={`h-12 text-left font-mono pl-16 ${errors.dev_plan_accumulated_cost ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                   dir="ltr"
                 />
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
                   ریال
                 </span>
               </div>
-              {data.dev_plan_accumulated_cost && (
+              {errors.dev_plan_accumulated_cost ? (
+                <p className="text-xs text-red-500">{errors.dev_plan_accumulated_cost}</p>
+              ) : data.dev_plan_accumulated_cost ? (
                 <p className="text-xs text-slate-500 text-right">
                   {formatNumber(data.dev_plan_accumulated_cost)} ریال
                 </p>
-              )}
+              ) : null}
             </div>
 
             <div className="space-y-2">
@@ -113,18 +122,20 @@ export default function DevelopmentPlanForm({ data, onChange }) {
                   value={data.dev_plan_remaining_cost || ""}
                   onChange={(e) => handleNumberChange("dev_plan_remaining_cost", e.target.value)}
                   placeholder="مثال: 50000000"
-                  className="h-12 text-left font-mono pl-16"
+                  className={`h-12 text-left font-mono pl-16 ${errors.dev_plan_remaining_cost ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                   dir="ltr"
                 />
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
                   ریال
                 </span>
               </div>
-              {data.dev_plan_remaining_cost && (
+              {errors.dev_plan_remaining_cost ? (
+                <p className="text-xs text-red-500">{errors.dev_plan_remaining_cost}</p>
+              ) : data.dev_plan_remaining_cost ? (
                 <p className="text-xs text-slate-500 text-right">
                   {formatNumber(data.dev_plan_remaining_cost)} ریال
                 </p>
-              )}
+              ) : null}
             </div>
           </div>
         </div>

@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 
-export default function LoansInfoForm({ data, onChange }) {
+export default function LoansInfoForm({ data, onChange, errors = {} }) {
   const handleChange = (field, value) => {
     onChange({ ...data, [field]: value });
   };
@@ -32,18 +32,20 @@ export default function LoansInfoForm({ data, onChange }) {
           value={data[id] || ""}
           onChange={(e) => handleNumberChange(id, e.target.value)}
           placeholder={placeholder}
-          className="h-12 text-left font-mono pl-16"
+          className={`h-12 text-left font-mono pl-16 ${errors[id] ? "border-red-500 focus-visible:ring-red-500" : ""}`}
           dir="ltr"
         />
         <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
           ریال
         </span>
       </div>
-      {data[id] && (
+      {errors[id] ? (
+        <p className="text-xs text-red-500">{errors[id]}</p>
+      ) : data[id] ? (
         <p className="text-xs text-slate-500 text-right">
           {formatNumber(data[id])} ریال
         </p>
-      )}
+      ) : null}
     </div>
   );
 
@@ -96,18 +98,20 @@ export default function LoansInfoForm({ data, onChange }) {
                   value={data.non_bank_financing_amount || ""}
                   onChange={(e) => handleNumberChange("non_bank_financing_amount", e.target.value)}
                   placeholder="مثال: 50000000"
-                  className="h-12 text-left font-mono pl-16"
+                  className={`h-12 text-left font-mono pl-16 ${errors.non_bank_financing_amount ? "border-red-500 focus-visible:ring-red-500" : ""}`}
                   dir="ltr"
                 />
                 <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-slate-400">
                   ریال
                 </span>
               </div>
-              {data.non_bank_financing_amount && (
+              {errors.non_bank_financing_amount ? (
+                <p className="text-xs text-red-500">{errors.non_bank_financing_amount}</p>
+              ) : data.non_bank_financing_amount ? (
                 <p className="text-xs text-slate-500 text-right">
                   {formatNumber(data.non_bank_financing_amount)} ریال
                 </p>
-              )}
+              ) : null}
             </div>
           )}
         </div>

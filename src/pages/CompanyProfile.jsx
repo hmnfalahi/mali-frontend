@@ -44,6 +44,7 @@ export default function CompanyProfile() {
   const [formData, setFormData] = useState({});
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   // Fetch existing company data
   const { data: company, isLoading } = useQuery({
@@ -119,32 +120,91 @@ export default function CompanyProfile() {
     },
   });
 
-  // Validate current step
-  const validateStep = (step) => {
+  // Get required fields for each step
+  const getRequiredFieldsForStep = (step) => {
     switch (step) {
       case 1:
-        if (!formData.title) return "نام شرکت الزامی است";
-        if (!formData.national_id) return "شناسه ملی الزامی است";
-        if (formData.national_id && formData.national_id.length !== 11) return "شناسه ملی باید 11 رقم باشد";
-        if (!formData.personnel_count) return "تعداد پرسنل الزامی است";
-        if (!formData.activity_subject) return "موضوع فعالیت الزامی است";
-        if (!formData.fiscal_year_end_date) return "تاریخ پایان سال مالی الزامی است";
-        if (!formData.audit_opinion_status) return "وضعیت اظهارنظر حسابرس الزامی است";
-        break;
+        return {
+          title: "نام شرکت الزامی است",
+          national_id: "شناسه ملی الزامی است",
+          personnel_count: "تعداد پرسنل الزامی است",
+          activity_subject: "موضوع فعالیت الزامی است",
+          fiscal_year_end_date: "تاریخ پایان سال مالی الزامی است",
+          audit_opinion_status: "وضعیت اظهارنظر حسابرس الزامی است",
+        };
       case 2:
-        if (!formData.registered_capital) return "سرمایه ثبت شده الزامی است";
-        break;
+        return {
+          registered_capital: "سرمایه ثبت شده الزامی است",
+          latest_net_profit: "سود (زیان) خالص الزامی است",
+          latest_operating_profit: "سود (زیان) عملیاتی الزامی است",
+          latest_inventory: "موجودی کالا و مواد الزامی است",
+          avg_working_capital: "میانگین سرمایه در گردش الزامی است",
+        };
+      case 3:
+        return {
+          total_assets: "جمع دارایی‌ها الزامی است",
+          total_liabilities: "جمع بدهی‌ها الزامی است",
+          disclosed_fixed_assets: "دارایی‌های ثابت مشهود الزامی است",
+          insured_fixed_assets: "دارایی‌های ثابت بیمه شده الزامی است",
+          depreciable_assets: "دارایی‌های استهلاک‌پذیر الزامی است",
+          latest_cash_on_hand: "موجودی نقد و بانک الزامی است",
+          cash_from_operations: "جریان نقد حاصل از عملیات الزامی است",
+          cash_from_operations_2y_cumulative: "جریان نقد عملیاتی تجمعی الزامی است",
+        };
+      case 4:
+        // Only validate if has_development_plan is true
+        if (formData.has_development_plan) {
+          return {
+            dev_plan_progress_percent: "درصد پیشرفت فیزیکی الزامی است",
+            dev_plan_estimated_end_date: "تاریخ تخمینی اتمام الزامی است",
+            dev_plan_accumulated_cost: "هزینه انباشته الزامی است",
+            dev_plan_remaining_cost: "هزینه باقیمانده الزامی است",
+          };
+        }
+        return {};
+      case 5:
+        const fields = {
+          total_facilities_received: "مجموع تسهیلات دریافتی الزامی است",
+          current_facilities: "تسهیلات جاری الزامی است",
+          non_current_facilities: "تسهیلات غیرجاری الزامی است",
+          defaulted_facilities_amount: "مبلغ تسهیلات معوق الزامی است",
+          bank_financing_amount: "مبلغ تأمین مالی بانکی الزامی است",
+        };
+        if (formData.non_bank_financing_status) {
+          fields.non_bank_financing_amount = "مبلغ تأمین مالی غیربانکی الزامی است";
+        }
+        return fields;
       default:
-        break;
+        return {};
     }
-    return null;
+  };
+
+  // Validate current step and return field errors
+  const validateStep = (step) => {
+    const requiredFields = getRequiredFieldsForStep(step);
+    const errors = {};
+
+    Object.entries(requiredFields).forEach(([field, message]) => {
+      if (!formData[field] && formData[field] !== 0) {
+        errors[field] = message;
+      }
+    });
+
+    // Special validation for national_id length
+    if (step === 1 && formData.national_id && formData.national_id.length !== 11) {
+      errors.national_id = "شناسه ملی باید 11 رقم باشد";
+    }
+
+    return Object.keys(errors).length > 0 ? errors : null;
   };
 
   const handleSave = () => {
     setError(null);
-    const stepError = validateStep(1); // At minimum validate basic info
-    if (stepError) {
-      setError(stepError);
+    setFieldErrors({});
+    const stepErrors = validateStep(1); // At minimum validate basic info
+    if (stepErrors) {
+      setFieldErrors(stepErrors);
+      setError("لطفاً فیلدهای الزامی را تکمیل کنید");
       setCurrentStep(1);
       return;
     }
@@ -153,9 +213,11 @@ export default function CompanyProfile() {
 
   const handleNext = () => {
     setError(null);
-    const stepError = validateStep(currentStep);
-    if (stepError) {
-      setError(stepError);
+    setFieldErrors({});
+    const stepErrors = validateStep(currentStep);
+    if (stepErrors) {
+      setFieldErrors(stepErrors);
+      setError("لطفاً فیلدهای الزامی را تکمیل کنید");
       return;
     }
     setCurrentStep((prev) => Math.min(steps.length, prev + 1));
@@ -163,11 +225,13 @@ export default function CompanyProfile() {
 
   const handleFinish = async () => {
     setError(null);
+    setFieldErrors({});
     // Validate all required fields
     for (let i = 1; i <= steps.length; i++) {
-      const stepError = validateStep(i);
-      if (stepError) {
-        setError(stepError);
+      const stepErrors = validateStep(i);
+      if (stepErrors) {
+        setFieldErrors(stepErrors);
+        setError("لطفاً فیلدهای الزامی را تکمیل کنید");
         setCurrentStep(i);
         return;
       }
@@ -179,6 +243,24 @@ export default function CompanyProfile() {
         navigate("/dashboard");
       }
     });
+  };
+
+  // Clear field error when user starts typing
+  const handleFormChange = (newData) => {
+    setFormData(newData);
+    // Clear errors for fields that now have values
+    if (Object.keys(fieldErrors).length > 0) {
+      const updatedErrors = { ...fieldErrors };
+      Object.keys(newData).forEach((field) => {
+        if (newData[field] && updatedErrors[field]) {
+          delete updatedErrors[field];
+        }
+      });
+      setFieldErrors(updatedErrors);
+      if (Object.keys(updatedErrors).length === 0) {
+        setError(null);
+      }
+    }
   };
 
   const CurrentStepComponent = steps[currentStep - 1].component;
@@ -296,7 +378,7 @@ export default function CompanyProfile() {
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
             >
-              <CurrentStepComponent data={formData} onChange={setFormData} />
+              <CurrentStepComponent data={formData} onChange={handleFormChange} errors={fieldErrors} />
             </motion.div>
           </AnimatePresence>
         </CardContent>
