@@ -26,7 +26,8 @@ api.interceptors.response.use(
         const requestUrl = originalRequest?.url || '';
         
         // Check if this is a public endpoint (login, signup, OTP, etc.)
-        const isPublicEndpoint = publicEndpoints.some(endpoint => requestUrl.includes(endpoint));
+        // Only check if we have a valid URL
+        const isPublicEndpoint = requestUrl && publicEndpoints.some(endpoint => requestUrl.includes(endpoint));
 
         // Prevent infinite loop if refresh token is invalid
         // Skip 401 handling for public endpoints - let the error propagate to the component
