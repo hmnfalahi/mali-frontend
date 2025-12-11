@@ -15,14 +15,22 @@ api.interceptors.request.use((config) => {
     return Promise.reject(error);
 });
 
+// Public endpoints that should not trigger 401 redirect
+const publicEndpoints = ['/users/login/', '/users/signup/', '/users/otp/', '/users/token/refresh/'];
+
 // Response Interceptor: Handle 401 & Refresh Token
 api.interceptors.response.use(
     (response) => response,
     async (error) => {
         const originalRequest = error.config;
+        const requestUrl = originalRequest?.url || '';
+        
+        // Check if this is a public endpoint (login, signup, OTP, etc.)
+        const isPublicEndpoint = publicEndpoints.some(endpoint => requestUrl.includes(endpoint));
 
         // Prevent infinite loop if refresh token is invalid
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        // Skip 401 handling for public endpoints - let the error propagate to the component
+        if (error.response?.status === 401 && !originalRequest._retry && !isPublicEndpoint) {
             originalRequest._retry = true;
             const refreshToken = localStorage.getItem('refresh_token');
 
