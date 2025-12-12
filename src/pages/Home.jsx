@@ -98,7 +98,7 @@ export default function Home() {
                                 <Building2 className="w-5 h-5" />
                             </div>
                             <span className="text-xl font-bold tracking-tight text-[#1e3a5f]">مالی</span>
-                        </div>
+                            </div>
 
                         {/* Desktop Menu */}
                         <div className="hidden md:flex items-center gap-8">
@@ -149,13 +149,13 @@ export default function Home() {
 
                 {/* Mobile Menu */}
                 <AnimatePresence>
-                    {mobileMenuOpen && (
-                        <motion.div
+                {mobileMenuOpen && (
+                    <motion.div
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: "auto" }}
                             exit={{ opacity: 0, height: 0 }}
                             className="md:hidden border-t border-slate-100 bg-white overflow-hidden"
-                        >
+                    >
                             <div className="px-4 py-6 space-y-4">
                                 <a href="#features" className="block text-base font-medium text-slate-600 hover:text-[#1e3a5f]" onClick={() => setMobileMenuOpen(false)}>ویژگی‌ها</a>
                                 <a href="#methods" className="block text-base font-medium text-slate-600 hover:text-[#1e3a5f]" onClick={() => setMobileMenuOpen(false)}>روش‌ها</a>
@@ -176,9 +176,9 @@ export default function Home() {
                                         </>
                                     )}
                                 </div>
-                            </div>
-                        </motion.div>
-                    )}
+                        </div>
+                    </motion.div>
+                )}
                 </AnimatePresence>
             </nav>
 
@@ -199,12 +199,12 @@ export default function Home() {
                             <Sparkles className="w-4 h-4 text-amber-500" />
                             <span>راهکار نوین تأمین مالی اسلامی</span>
                         </div>
-                        
+
                         <h1 className="text-4xl sm:text-5xl lg:text-7xl font-extrabold text-slate-900 tracking-tight mb-8 leading-[1.15]">
                             رشد کسب‌وکار شما با<br className="hidden sm:block" />
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#1e3a5f] to-[#3b82f6]"> سرمایه هوشمند</span>
                         </h1>
-                        
+
                         <p className="max-w-2xl mx-auto text-lg sm:text-xl text-slate-600 mb-10 leading-relaxed">
                             پلتفرم جامع تأمین مالی جمعی با رویکرد اسلامی.
                             سریع‌ترین مسیر برای تأمین نقدینگی مورد نیاز پروژه‌های شما.
@@ -214,19 +214,19 @@ export default function Home() {
                             <Link to={user ? "/dashboard" : "/signup"}>
                                 <Button className="h-14 px-8 text-lg bg-[#1e3a5f] hover:bg-[#162c46] text-white rounded-2xl shadow-xl shadow-[#1e3a5f]/20 transition-all hover:scale-105 active:scale-95 min-w-[180px]">
                                     {user ? "ورود به داشبورد" : "شروع رایگان"}
-                                    <ArrowLeft className="w-5 h-5 mr-2" />
-                                </Button>
-                            </Link>
+                                        <ArrowLeft className="w-5 h-5 mr-2" />
+                                    </Button>
+                                </Link>
                             <a href="#methods">
                                 <Button variant="outline" className="h-14 px-8 text-lg border-slate-200 text-slate-600 hover:bg-slate-50 rounded-2xl min-w-[180px]">
                                     مشاوره بگیرید
-                                </Button>
+                                    </Button>
                             </a>
                         </div>
                     </motion.div>
 
                     {/* Stats Grid */}
-                    <motion.div 
+                    <motion.div
                         initial={{ opacity: 0, y: 40 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.6, delay: 0.2 }}
@@ -266,7 +266,7 @@ export default function Home() {
                                 >
                                     <div className="w-12 h-12 bg-[#1e3a5f]/5 rounded-2xl flex items-center justify-center mb-6">
                                         <Icon className="w-6 h-6 text-[#1e3a5f]" />
-                                    </div>
+                                            </div>
                                     <h3 className="text-xl font-bold text-slate-900 mb-3">{feature.title}</h3>
                                     <p className="text-slate-500 leading-relaxed text-sm">
                                         {feature.description}
@@ -307,7 +307,7 @@ export default function Home() {
                                 >
                                     <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${method.color} flex items-center justify-center mb-6 group-hover:scale-110 transition-transform`}>
                                         <Icon className={`w-7 h-7 ${method.iconColor}`} />
-                                    </div>
+                                                </div>
                                     <h3 className="text-2xl font-bold text-slate-900 mb-2">{method.name}</h3>
                                     <p className="text-slate-500 mb-6">{method.desc}</p>
                                     
@@ -315,13 +315,13 @@ export default function Home() {
                                         {method.tags.map((tag, i) => (
                                             <span key={i} className="text-xs font-medium px-2.5 py-1 rounded-lg bg-slate-50 text-slate-600 border border-slate-100">
                                                 {tag}
-                                            </span>
-                                        ))}
-                                    </div>
+                                                        </span>
+                                                    ))}
+                                            </div>
 
                                     <div className="flex items-center text-[#1e3a5f] font-medium text-sm group-hover:gap-2 transition-all">
                                         اطلاعات بیشتر <ArrowLeft className="w-4 h-4 mr-1 transition-transform group-hover:-translate-x-1" />
-                                    </div>
+                                            </div>
                                 </motion.div>
                             );
                         })}
@@ -357,7 +357,7 @@ export default function Home() {
                                 <p className="text-blue-100/70 text-sm leading-relaxed max-w-[200px] mx-auto md:mx-0">
                                     {item.desc}
                                 </p>
-                            </div>
+                                        </div>
                         ))}
                     </div>
                 </div>
@@ -369,7 +369,7 @@ export default function Home() {
                     <div className="bg-slate-50 rounded-[2.5rem] p-12 md:p-20 text-center border border-slate-100 shadow-sm relative overflow-hidden">
                         <div className="absolute top-0 right-0 w-64 h-64 bg-blue-100/50 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
                         <div className="absolute bottom-0 left-0 w-64 h-64 bg-amber-100/50 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
-                        
+
                         <div className="relative z-10">
                             <h2 className="text-3xl md:text-4xl font-bold text-slate-900 mb-6 tracking-tight">
                                 آماده شروع رشد کسب‌وکارتان هستید؟
@@ -382,9 +382,9 @@ export default function Home() {
                                 <Link to={user ? "/dashboard" : "/signup"}>
                                     <Button className="h-14 px-8 text-lg bg-[#1e3a5f] hover:bg-[#162c46] text-white rounded-2xl shadow-xl shadow-[#1e3a5f]/20 min-w-[200px]">
                                         {user ? "ورود به پنل" : "شروع رایگان"}
-                                        <ArrowLeft className="w-5 h-5 mr-2" />
-                                    </Button>
-                                </Link>
+                                            <ArrowLeft className="w-5 h-5 mr-2" />
+                                        </Button>
+                                    </Link>
                                 <Button variant="ghost" className="h-14 px-8 text-lg text-slate-600 hover:bg-white hover:shadow-md rounded-2xl min-w-[200px]">
                                     <Phone className="w-5 h-5 ml-2" />
                                     تماس با پشتیبانی

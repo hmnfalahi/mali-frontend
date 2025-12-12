@@ -50,7 +50,7 @@ export default function CompanyProfile() {
   const { data: company, isLoading } = useQuery({
     queryKey: ["company", user?.phone_number],
     queryFn: async () => {
-      const companies = await apiService.entities.Company.list({ created_by: user.phone_number });
+      const companies = await apiService.entities.Company.list();
       return companies[0] || null;
     },
     enabled: !!user,
@@ -187,7 +187,7 @@ export default function CompanyProfile() {
     Object.entries(requiredFields).forEach(([field, message]) => {
       if (!formData[field] && formData[field] !== 0) {
         errors[field] = message;
-      }
+    }
     });
 
     // Special validation for national_id length

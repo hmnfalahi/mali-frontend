@@ -41,7 +41,7 @@ export default function Dashboard() {
     const { data: company, isLoading: companyLoading } = useQuery({
         queryKey: ["company", user?.phone_number],
         queryFn: async () => {
-            const companies = await apiService.entities.Company.filter({ created_by: user.phone_number });
+            const companies = await apiService.entities.Company.list();
             return companies[0] || null;
         },
         enabled: !!user,
@@ -51,7 +51,7 @@ export default function Dashboard() {
     const { data: requests = [], isLoading: requestsLoading } = useQuery({
         queryKey: ["requests", user?.phone_number],
         queryFn: async () => {
-            return await apiService.entities.FinancingRequest.filter({ created_by: user.phone_number }, "-created_date");
+            return await apiService.entities.FinancingRequest.list();
         },
         enabled: !!user,
     });

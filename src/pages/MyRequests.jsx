@@ -94,7 +94,7 @@ export default function MyRequests() {
     const { data: company } = useQuery({
         queryKey: ["company", user?.phone_number],
         queryFn: async () => {
-            const companies = await apiService.entities.Company.list({ created_by: user.phone_number });
+            const companies = await apiService.entities.Company.list();
             return companies[0] || null;
         },
         enabled: !!user,
