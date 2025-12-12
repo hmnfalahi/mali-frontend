@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { apiService } from "@/services/api";
 import { useAuth } from "@/context/AuthContext";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -58,167 +58,167 @@ const CompanyDetailView = ({ data, onEdit }) => {
   return (
     <div className="space-y-8">
       {/* Header Section */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="relative overflow-hidden rounded-3xl bg-gradient-to-l from-[#1e3a5f] via-[#2d5a8a] to-[#1e3a5f] p-8 text-white shadow-lg shadow-blue-900/20"
       >
         <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl" />
         <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#d4af37]/20 rounded-full translate-x-1/4 translate-y-1/4 blur-3xl" />
-        
+
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div>
-                <div className="flex items-center gap-2 mb-2">
-                    <Building2 className="w-5 h-5 text-white/80" />
-                    <span className="text-blue-100 text-sm">پروفایل شرکت</span>
-                </div>
-                <h1 className="text-2xl md:text-3xl font-bold mb-2">{data.title || "شرکت بدون نام"}</h1>
-                <p className="text-blue-100/80 font-mono text-sm tracking-wider">
-                    شناسه ملی: {data.national_id || "-"}
-                </p>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Building2 className="w-5 h-5 text-white/80" />
+              <span className="text-blue-100 text-sm">پروفایل شرکت</span>
             </div>
-            <Button 
-                onClick={onEdit} 
-                className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm transition-all hover:scale-105"
-            >
-                <Edit className="w-4 h-4 ml-2" />
-                ویرایش اطلاعات
-            </Button>
+            <h1 className="text-2xl md:text-3xl font-bold mb-2">{data.title || "شرکت بدون نام"}</h1>
+            <p className="text-blue-100/80 font-mono text-sm tracking-wider">
+              شناسه ملی: {data.national_id || "-"}
+            </p>
+          </div>
+          <Button
+            onClick={onEdit}
+            className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm transition-all hover:scale-105"
+          >
+            <Edit className="w-4 h-4 ml-2" />
+            ویرایش اطلاعات
+          </Button>
         </div>
       </motion.div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Basic Info Card */}
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ delay: 0.1 }}
-            className="h-full"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="h-full"
         >
-            <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl overflow-hidden h-full">
-                <div className="bg-slate-50/80 border-b border-slate-100 p-4 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                        <Check className="w-4 h-4" />
-                    </div>
-                    <h3 className="font-semibold text-slate-800">اطلاعات پایه</h3>
-                </div>
-                <div className="p-6 grid grid-cols-2 gap-6">
-                    <InfoItem label="تعداد پرسنل" value={data.personnel_count} suffix="نفر" />
-                    <InfoItem label="تاریخ پایان سال مالی" value={formatJalaliDate(data.fiscal_year_end_date)} />
-                    <div className="col-span-2">
-                        <InfoItem label="موضوع فعالیت" value={data.activity_subject} />
-                    </div>
-                    <InfoItem label="وضعیت حسابرس" value={data.audit_opinion_status} />
-                    <InfoItem label="حسابرس معتمد بورس" value={data.auditor_is_bourse_trusted ? "بله" : "خیر"} />
-                    <InfoItem label="صورت‌های مالی میان‌دوره‌ای" value={data.prepares_interim_fs ? "بله" : "خیر"} />
-                </div>
-            </Card>
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl overflow-hidden h-full">
+            <div className="bg-slate-50/80 border-b border-slate-100 p-4 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                <Check className="w-4 h-4" />
+              </div>
+              <h3 className="font-semibold text-slate-800">اطلاعات پایه</h3>
+            </div>
+            <div className="p-6 grid grid-cols-2 gap-6">
+              <InfoItem label="تعداد پرسنل" value={data.personnel_count} suffix="نفر" />
+              <InfoItem label="تاریخ پایان سال مالی" value={formatJalaliDate(data.fiscal_year_end_date)} />
+              <div className="col-span-2">
+                <InfoItem label="موضوع فعالیت" value={data.activity_subject} />
+              </div>
+              <InfoItem label="وضعیت حسابرس" value={data.audit_opinion_status} />
+              <InfoItem label="حسابرس معتمد بورس" value={data.auditor_is_bourse_trusted ? "بله" : "خیر"} />
+              <InfoItem label="صورت‌های مالی میان‌دوره‌ای" value={data.prepares_interim_fs ? "بله" : "خیر"} />
+            </div>
+          </Card>
         </motion.div>
 
         {/* Financial Info Card */}
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ delay: 0.2 }}
-            className="h-full"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="h-full"
         >
-            <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl overflow-hidden h-full">
-                <div className="bg-slate-50/80 border-b border-slate-100 p-4 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-                        <DollarSign className="w-4 h-4" />
-                    </div>
-                    <h3 className="font-semibold text-slate-800">اطلاعات مالی</h3>
-                </div>
-                <div className="p-6 grid grid-cols-2 gap-6">
-                    <InfoItem label="سرمایه ثبت شده" value={data.registered_capital} isNumber suffix="ریال" />
-                    <InfoItem label="سود خالص (آخرین دوره)" value={data.latest_net_profit} isNumber suffix="ریال" />
-                    <InfoItem label="سود عملیاتی" value={data.latest_operating_profit} isNumber suffix="ریال" />
-                    <InfoItem label="موجودی کالا" value={data.latest_inventory} isNumber suffix="ریال" />
-                    <InfoItem label="سرمایه در گردش" value={data.avg_working_capital} isNumber suffix="ریال" />
-                </div>
-            </Card>
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl overflow-hidden h-full">
+            <div className="bg-slate-50/80 border-b border-slate-100 p-4 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
+                <DollarSign className="w-4 h-4" />
+              </div>
+              <h3 className="font-semibold text-slate-800">اطلاعات مالی</h3>
+            </div>
+            <div className="p-6 grid grid-cols-2 gap-6">
+              <InfoItem label="سرمایه ثبت شده" value={data.registered_capital} isNumber suffix="ریال" />
+              <InfoItem label="سود خالص (آخرین دوره)" value={data.latest_net_profit} isNumber suffix="ریال" />
+              <InfoItem label="سود عملیاتی" value={data.latest_operating_profit} isNumber suffix="ریال" />
+              <InfoItem label="موجودی کالا" value={data.latest_inventory} isNumber suffix="ریال" />
+              <InfoItem label="سرمایه در گردش" value={data.avg_working_capital} isNumber suffix="ریال" />
+            </div>
+          </Card>
         </motion.div>
 
         {/* Assets Info Card */}
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ delay: 0.3 }}
-            className="h-full"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="h-full"
         >
-            <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl overflow-hidden h-full">
-                <div className="bg-slate-50/80 border-b border-slate-100 p-4 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
-                        <Landmark className="w-4 h-4" />
-                    </div>
-                    <h3 className="font-semibold text-slate-800">دارایی‌ها</h3>
-                </div>
-                <div className="p-6 grid grid-cols-2 gap-6">
-                    <InfoItem label="جمع دارایی‌ها" value={data.total_assets} isNumber suffix="ریال" />
-                    <InfoItem label="جمع بدهی‌ها" value={data.total_liabilities} isNumber suffix="ریال" />
-                    <InfoItem label="دارایی‌های ثابت مشهود" value={data.disclosed_fixed_assets} isNumber suffix="ریال" />
-                    <InfoItem label="دارایی‌های ثابت بیمه شده" value={data.insured_fixed_assets} isNumber suffix="ریال" />
-                    <InfoItem label="موجودی نقد" value={data.latest_cash_on_hand} isNumber suffix="ریال" />
-                </div>
-            </Card>
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl overflow-hidden h-full">
+            <div className="bg-slate-50/80 border-b border-slate-100 p-4 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
+                <Landmark className="w-4 h-4" />
+              </div>
+              <h3 className="font-semibold text-slate-800">دارایی‌ها</h3>
+            </div>
+            <div className="p-6 grid grid-cols-2 gap-6">
+              <InfoItem label="جمع دارایی‌ها" value={data.total_assets} isNumber suffix="ریال" />
+              <InfoItem label="جمع بدهی‌ها" value={data.total_liabilities} isNumber suffix="ریال" />
+              <InfoItem label="دارایی‌های ثابت مشهود" value={data.disclosed_fixed_assets} isNumber suffix="ریال" />
+              <InfoItem label="دارایی‌های ثابت بیمه شده" value={data.insured_fixed_assets} isNumber suffix="ریال" />
+              <InfoItem label="موجودی نقد" value={data.latest_cash_on_hand} isNumber suffix="ریال" />
+            </div>
+          </Card>
         </motion.div>
 
         {/* Loans Info Card */}
-        <motion.div 
-            initial={{ opacity: 0, y: 20 }} 
-            animate={{ opacity: 1, y: 0 }} 
-            transition={{ delay: 0.4 }}
-            className="h-full"
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="h-full"
         >
-            <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl overflow-hidden h-full">
-                <div className="bg-slate-50/80 border-b border-slate-100 p-4 flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
-                        <CreditCard className="w-4 h-4" />
-                    </div>
-                    <h3 className="font-semibold text-slate-800">تسهیلات و تعهدات</h3>
+          <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl overflow-hidden h-full">
+            <div className="bg-slate-50/80 border-b border-slate-100 p-4 flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
+                <CreditCard className="w-4 h-4" />
+              </div>
+              <h3 className="font-semibold text-slate-800">تسهیلات و تعهدات</h3>
+            </div>
+            <div className="p-6 grid grid-cols-2 gap-6">
+              <InfoItem label="تسهیلات جاری" value={data.current_facilities} isNumber suffix="ریال" />
+              <InfoItem label="تسهیلات غیرجاری" value={data.non_current_facilities} isNumber suffix="ریال" />
+              <InfoItem label="تسهیلات معوق" value={data.defaulted_facilities_amount} isNumber suffix="ریال" />
+              <div className="col-span-2 bg-slate-50 rounded-xl p-4 mt-2 border border-slate-100">
+                <p className="text-xs font-medium text-slate-500 mb-3 flex items-center gap-2">
+                  <AlertCircle className="w-3 h-3" />
+                  تأمین مالی غیربانکی
+                </p>
+                <div className="grid grid-cols-2 gap-4">
+                  <InfoItem label="وضعیت" value={data.non_bank_financing_status ? "دارد" : "ندارد"} />
+                  {data.non_bank_financing_status && (
+                    <InfoItem label="مبلغ" value={data.non_bank_financing_amount} isNumber suffix="ریال" />
+                  )}
                 </div>
-                <div className="p-6 grid grid-cols-2 gap-6">
-                    <InfoItem label="تسهیلات جاری" value={data.current_facilities} isNumber suffix="ریال" />
-                    <InfoItem label="تسهیلات غیرجاری" value={data.non_current_facilities} isNumber suffix="ریال" />
-                    <InfoItem label="تسهیلات معوق" value={data.defaulted_facilities_amount} isNumber suffix="ریال" />
-                    <div className="col-span-2 bg-slate-50 rounded-xl p-4 mt-2 border border-slate-100">
-                        <p className="text-xs font-medium text-slate-500 mb-3 flex items-center gap-2">
-                            <AlertCircle className="w-3 h-3" />
-                            تأمین مالی غیربانکی
-                        </p>
-                        <div className="grid grid-cols-2 gap-4">
-                            <InfoItem label="وضعیت" value={data.non_bank_financing_status ? "دارد" : "ندارد"} />
-                            {data.non_bank_financing_status && (
-                                <InfoItem label="مبلغ" value={data.non_bank_financing_amount} isNumber suffix="ریال" />
-                            )}
-                        </div>
-                    </div>
-                </div>
-            </Card>
+              </div>
+            </div>
+          </Card>
         </motion.div>
-        
+
         {data.has_development_plan && (
-            <motion.div 
-                initial={{ opacity: 0, y: 20 }} 
-                animate={{ opacity: 1, y: 0 }} 
-                transition={{ delay: 0.5 }} 
-                className="md:col-span-2"
-            >
-                <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl overflow-hidden">
-                    <div className="bg-slate-50/80 border-b border-slate-100 p-4 flex items-center gap-3">
-                        <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600">
-                            <TrendingUp className="w-4 h-4" />
-                        </div>
-                        <h3 className="font-semibold text-slate-800">طرح توسعه</h3>
-                    </div>
-                    <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-6">
-                        <InfoItem label="پیشرفت فیزیکی" value={data.dev_plan_progress_percent} suffix="%" />
-                        <InfoItem label="تاریخ اتمام" value={formatJalaliDate(data.dev_plan_estimated_end_date)} />
-                        <InfoItem label="هزینه انباشته" value={data.dev_plan_accumulated_cost} isNumber suffix="ریال" />
-                        <InfoItem label="هزینه باقیمانده" value={data.dev_plan_remaining_cost} isNumber suffix="ریال" />
-                    </div>
-                </Card>
-            </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="md:col-span-2"
+          >
+            <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl overflow-hidden">
+              <div className="bg-slate-50/80 border-b border-slate-100 p-4 flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-rose-50 flex items-center justify-center text-rose-600">
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+                <h3 className="font-semibold text-slate-800">طرح توسعه</h3>
+              </div>
+              <div className="p-6 grid grid-cols-2 md:grid-cols-4 gap-6">
+                <InfoItem label="پیشرفت فیزیکی" value={data.dev_plan_progress_percent} suffix="%" />
+                <InfoItem label="تاریخ اتمام" value={formatJalaliDate(data.dev_plan_estimated_end_date)} />
+                <InfoItem label="هزینه انباشته" value={data.dev_plan_accumulated_cost} isNumber suffix="ریال" />
+                <InfoItem label="هزینه باقیمانده" value={data.dev_plan_remaining_cost} isNumber suffix="ریال" />
+              </div>
+            </Card>
+          </motion.div>
         )}
       </div>
     </div>
@@ -228,6 +228,7 @@ const CompanyDetailView = ({ data, onEdit }) => {
 export default function CompanyProfile() {
   const { user, checkCompanyStatus } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState({});
@@ -250,12 +251,19 @@ export default function CompanyProfile() {
   useEffect(() => {
     if (company) {
       setFormData(company);
-      // Switch to read-only mode if we have at least a title (company exists)
-      if (company.title) {
+
+      // Check for edit mode in URL
+      const params = new URLSearchParams(location.search);
+      const shouldEdit = params.get("mode") === "edit";
+
+      // Switch to read-only mode if we have at least a title (company exists) and not forced to edit
+      if (company.title && !shouldEdit) {
         setIsEditing(false);
+      } else if (shouldEdit) {
+        setIsEditing(true);
       }
     }
-  }, [company]);
+  }, [company, location.search]);
 
   // Prepare payload for API
   const preparePayload = (data) => {
@@ -382,7 +390,7 @@ export default function CompanyProfile() {
     Object.entries(requiredFields).forEach(([field, message]) => {
       if (!formData[field] && formData[field] !== 0) {
         errors[field] = message;
-    }
+      }
     });
 
     // Special validation for national_id length
@@ -484,7 +492,7 @@ export default function CompanyProfile() {
   }
 
   return (
-    <motion.div 
+    <motion.div
       className="max-w-4xl mx-auto space-y-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -499,8 +507,8 @@ export default function CompanyProfile() {
         </div>
         <div className="flex gap-3">
           {company && company.title && (
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               onClick={() => setIsEditing(false)}
             >
               انصراف

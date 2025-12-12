@@ -113,7 +113,7 @@ export default function Dashboard() {
                                     اطلاعات شرکت
                                 </CardTitle>
                                 {company && (
-                                    <Link to={createPageUrl("CompanyProfile")}>
+                                    <Link to={createPageUrl("CompanyProfile") + "?mode=edit"}>
                                         <Button variant="outline" size="sm" className="h-8">
                                             ویرایش
                                             <ArrowLeft className="w-3 h-3 mr-1" />
