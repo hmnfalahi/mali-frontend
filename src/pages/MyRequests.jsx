@@ -311,21 +311,36 @@ export default function MyRequests() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="max-w-4xl mx-auto space-y-8">
             {/* Header */}
-            <div className="flex items-center justify-between flex-wrap gap-4">
-                <div>
-                    <h1 className="text-2xl font-bold text-slate-800">درخواست‌های تأمین مالی</h1>
-                    <p className="text-slate-500 mt-1">مدیریت درخواست‌های تأمین مالی شرکت‌تان</p>
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="relative overflow-hidden rounded-3xl bg-gradient-to-l from-[#1e3a5f] via-[#2d5a8a] to-[#1e3a5f] p-8 text-white shadow-lg shadow-blue-900/20"
+            >
+                <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl" />
+                <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#d4af37]/20 rounded-full translate-x-1/4 translate-y-1/4 blur-3xl" />
+                
+                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <div className="flex items-center gap-2 mb-2">
+                            <FileText className="w-5 h-5 text-white/80" />
+                            <span className="text-blue-100 text-sm">مدیریت درخواست‌ها</span>
+                        </div>
+                        <h1 className="text-2xl md:text-3xl font-bold mb-2">درخواست‌های تأمین مالی</h1>
+                        <p className="text-blue-100/80 text-sm">
+                            مدیریت و پیگیری درخواست‌های تأمین مالی شرکت
+                        </p>
+                    </div>
+                    <Button
+                        onClick={handleOpenCreate}
+                        className="bg-white/10 hover:bg-white/20 text-white border-white/20 backdrop-blur-sm h-12 px-6 rounded-xl transition-all hover:scale-105"
+                    >
+                        <Plus className="w-5 h-5 ml-2" />
+                        درخواست جدید
+                    </Button>
                 </div>
-                <Button
-                    onClick={handleOpenCreate}
-                    className="bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a]"
-                >
-                    <Plus className="w-4 h-4 ml-2" />
-                    درخواست جدید
-                </Button>
-            </div>
+            </motion.div>
 
             {/* Messages */}
             <AnimatePresence>
@@ -614,7 +629,11 @@ export default function MyRequests() {
                     ))}
                 </div>
             ) : requests.length === 0 ? (
-                <Card className="border-0 shadow-lg shadow-slate-200/50">
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                >
+                <Card className="border-0 shadow-sm bg-white rounded-2xl overflow-hidden">
                     <CardContent className="p-12 text-center">
                         <div className="w-20 h-20 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-6">
                             <FileText className="w-10 h-10 text-slate-400" />
@@ -632,6 +651,7 @@ export default function MyRequests() {
                         </Button>
                     </CardContent>
                 </Card>
+                </motion.div>
             ) : (
                 <div className="grid gap-4">
                     {requests.map((request, index) => {
@@ -646,7 +666,7 @@ export default function MyRequests() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: index * 0.05 }}
                             >
-                                <Card className="border-0 shadow-lg shadow-slate-200/50 hover:shadow-xl transition-shadow">
+                                <Card className="border-0 shadow-sm hover:shadow-md transition-shadow bg-white rounded-2xl overflow-hidden">
                                     <CardContent className="p-6">
                                         <div className="flex flex-col lg:flex-row lg:items-center gap-4">
                                             {/* Main Info */}

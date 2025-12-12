@@ -121,14 +121,26 @@ export default function Account() {
     }
 
     return (
-        <div className="max-w-2xl mx-auto space-y-6">
+        <div className="max-w-3xl mx-auto space-y-8">
             {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
+                className="relative overflow-hidden rounded-3xl bg-gradient-to-l from-[#1e3a5f] via-[#2d5a8a] to-[#1e3a5f] p-8 text-white shadow-lg shadow-blue-900/20 mb-8"
             >
-                <h1 className="text-2xl font-bold text-slate-800">حساب کاربری</h1>
-                <p className="text-slate-500 mt-1">مدیریت اطلاعات حساب کاربری</p>
+                <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl" />
+                <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#d4af37]/20 rounded-full translate-x-1/4 translate-y-1/4 blur-3xl" />
+                
+                <div className="relative z-10">
+                    <div className="flex items-center gap-2 mb-2">
+                        <User className="w-5 h-5 text-white/80" />
+                        <span className="text-blue-100 text-sm">پروفایل کاربری</span>
+                    </div>
+                    <h1 className="text-2xl md:text-3xl font-bold mb-2">حساب کاربری</h1>
+                    <p className="text-blue-100/80 text-sm">
+                        مدیریت اطلاعات شخصی و تنظیمات امنیتی
+                    </p>
+                </div>
             </motion.div>
 
             {/* Messages */}
@@ -166,7 +178,7 @@ export default function Account() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
             >
-            <Card className="border-0 shadow-lg shadow-slate-200/50">
+            <Card className="border-0 shadow-sm bg-white rounded-2xl overflow-hidden">
                 <CardHeader className="border-b border-slate-100">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
@@ -293,7 +305,7 @@ export default function Account() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
             >
-            <Card className="border-0 shadow-lg shadow-slate-200/50">
+            <Card className="border-0 shadow-sm bg-white rounded-2xl overflow-hidden">
                 <CardHeader className="border-b border-slate-100">
                     <div className="flex items-center gap-3">
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center">
