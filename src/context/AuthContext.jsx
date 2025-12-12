@@ -29,7 +29,7 @@ export function AuthProvider({ children }) {
 
                 // Check if user has a company
                 try {
-                    const companies = await apiService.entities.Company.list({ created_by: userData.phone_number });
+                    const companies = await apiService.entities.Company.list();
                     setHasCompany(companies.length > 0);
                     if (companies.length > 0) {
                         setCompanyId(companies[0].id);
@@ -59,7 +59,7 @@ export function AuthProvider({ children }) {
             const userData = userResp.data;
             setUser(userData);
             
-            const companies = await apiService.entities.Company.list({ created_by: userData.phone_number });
+            const companies = await apiService.entities.Company.list();
             setHasCompany(companies.length > 0);
             if (companies.length > 0) {
                 setCompanyId(companies[0].id);
@@ -116,7 +116,7 @@ export function AuthProvider({ children }) {
     const checkCompanyStatus = async () => {
         if (!user) return;
         try {
-            const companies = await apiService.entities.Company.list({ created_by: user.phone_number });
+            const companies = await apiService.entities.Company.list();
             setHasCompany(companies.length > 0);
             if (companies.length > 0) {
                 setCompanyId(companies[0].id);
