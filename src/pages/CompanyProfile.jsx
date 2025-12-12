@@ -247,6 +247,8 @@ export default function CompanyProfile() {
     enabled: !!user,
   });
 
+  const draftKey = `company_profile_draft_${user?.phone_number}`;
+
   // Populate form when company data loads
   useEffect(() => {
     if (company) {
@@ -262,8 +264,22 @@ export default function CompanyProfile() {
       } else if (shouldEdit) {
         setIsEditing(true);
       }
+    } else if (!isLoading && !company) {
+      // If no company exists (Create Mode), try to load draft
+      const savedDraft = localStorage.getItem(draftKey);
+      if (savedDraft) {
+        try {
+          const parsed = JSON.parse(savedDraft);
+          setFormData(parsed);
+          // Optional: Notify user
+          // setSuccessMessage("پیش‌نویس ذخیره شده بازیابی شد");
+          // setTimeout(() => setSuccessMessage(null), 3000);
+        } catch (e) {
+          console.error("Failed to parse draft", e);
+        }
+      }
     }
-  }, [company, location.search]);
+  }, [company, location.search, isLoading, draftKey]);
 
   // Prepare payload for API
   const preparePayload = (data) => {
@@ -316,6 +332,7 @@ export default function CompanyProfile() {
       setSuccessMessage("اطلاعات با موفقیت ذخیره شد");
       setTimeout(() => setSuccessMessage(null), 3000);
       setIsEditing(false);
+      localStorage.removeItem(draftKey);
     },
     onError: (err) => {
       console.error("Save failed", err);
@@ -451,6 +468,8 @@ export default function CompanyProfile() {
   // Clear field error when user starts typing
   const handleFormChange = (newData) => {
     setFormData(newData);
+    localStorage.setItem(draftKey, JSON.stringify(newData));
+
     // Clear errors for fields that now have values
     if (Object.keys(fieldErrors).length > 0) {
       const updatedErrors = { ...fieldErrors };

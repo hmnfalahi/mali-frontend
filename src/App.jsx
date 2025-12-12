@@ -1,16 +1,19 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
-import Dashboard from './pages/Dashboard'
-import Home from './pages/Home'
-import Login from './pages/Login'
-import Signup from './pages/Signup'
-import ForgotPassword from './pages/ForgotPassword'
-import CompanyProfile from './pages/CompanyProfile'
-import MyRequests from './pages/MyRequests'
-import Account from './pages/Account'
-import ChangePassword from './pages/ChangePassword'
+import React, { Suspense, lazy } from 'react';
 import Layout from './layouts/Layout'
+
+// Lazy load pages
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Signup = lazy(() => import('./pages/Signup'));
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
+const CompanyProfile = lazy(() => import('./pages/CompanyProfile'));
+const MyRequests = lazy(() => import('./pages/MyRequests'));
+const Account = lazy(() => import('./pages/Account'));
+const ChangePassword = lazy(() => import('./pages/ChangePassword'));
 
 const queryClient = new QueryClient()
 
@@ -60,47 +63,57 @@ function LayoutWrapper({ children }) {
   )
 }
 
+function LoadingFallback() {
+  return (
+    <div className="h-screen flex items-center justify-center">
+      <div className="animate-spin rounded-full h-12 w-12 border-4 border-[#1e3a5f] border-t-transparent" />
+    </div>
+  );
+}
+
 function App() {
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<LayoutWrapper><Home /></LayoutWrapper>} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
+          <Suspense fallback={<LoadingFallback />}>
+            <Routes>
+              <Route path="/" element={<LayoutWrapper><Home /></LayoutWrapper>} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
 
-            <Route path="/dashboard" element={
-              <ProtectedRoute>
-                <LayoutWrapper><Dashboard /></LayoutWrapper>
-              </ProtectedRoute>
-            } />
+              <Route path="/dashboard" element={
+                <ProtectedRoute>
+                  <LayoutWrapper><Dashboard /></LayoutWrapper>
+                </ProtectedRoute>
+              } />
 
-            <Route path="/company-profile" element={
-              <ProtectedRoute>
-                <LayoutWrapper><CompanyProfile /></LayoutWrapper>
-              </ProtectedRoute>
-            } />
+              <Route path="/company-profile" element={
+                <ProtectedRoute>
+                  <LayoutWrapper><CompanyProfile /></LayoutWrapper>
+                </ProtectedRoute>
+              } />
 
-            <Route path="/my-requests" element={
-              <ProtectedRoute>
-                <LayoutWrapper><MyRequests /></LayoutWrapper>
-              </ProtectedRoute>
-            } />
+              <Route path="/my-requests" element={
+                <ProtectedRoute>
+                  <LayoutWrapper><MyRequests /></LayoutWrapper>
+                </ProtectedRoute>
+              } />
 
-            <Route path="/account" element={
-              <ProtectedRoute>
-                <LayoutWrapper><Account /></LayoutWrapper>
-              </ProtectedRoute>
-            } />
+              <Route path="/account" element={
+                <ProtectedRoute>
+                  <LayoutWrapper><Account /></LayoutWrapper>
+                </ProtectedRoute>
+              } />
 
-            <Route path="/change-password" element={
-              <ProtectedRoute>
-                <LayoutWrapper><ChangePassword /></LayoutWrapper>
-              </ProtectedRoute>
-            } />
-          </Routes>
+              <Route path="/change-password" element={
+                <ProtectedRoute>
+                  <LayoutWrapper><ChangePassword /></LayoutWrapper>
+                </ProtectedRoute>
+              } />
+            </Routes>
+          </Suspense>
         </BrowserRouter>
       </QueryClientProvider>
     </AuthProvider>
