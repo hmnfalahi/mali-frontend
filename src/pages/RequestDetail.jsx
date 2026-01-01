@@ -23,7 +23,10 @@ import {
     User,
     Settings,
     Check,
-    RotateCcw
+    RotateCcw,
+    File,
+    FileImage,
+    FileSpreadsheet
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -64,6 +67,158 @@ const actorLabels = {
     "PLATFORM": "پلتفرم",
 };
 
+// Get file icon based on type
+const getFileIcon = (fileType) => {
+    if (!fileType) return File;
+    const type = fileType.toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].includes(type)) return FileImage;
+    if (['xls', 'xlsx', 'csv'].includes(type)) return FileSpreadsheet;
+    return FileText;
+};
+
+// Document Upload Card Component
+function DocumentUploadCard({ 
+    config, 
+    isUploaded, 
+    documentId, 
+    documentFile,
+    onUpload, 
+    onDelete,
+    isUploading,
+    canEdit 
+}) {
+    const fileInputRef = useRef(null);
+    const FileIcon = isUploaded ? getFileIcon(documentFile?.split('.').pop()) : Upload;
+
+    const handleFileSelect = (e) => {
+        const file = e.target.files?.[0];
+        if (file) {
+            onUpload(config.config_id, file);
+            e.target.value = "";
+        }
+    };
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className={`relative rounded-xl border-2 transition-all ${
+                isUploaded 
+                    ? 'border-emerald-200 bg-emerald-50/50' 
+                    : config.is_mandatory
+                        ? 'border-amber-200 bg-amber-50/50'
+                        : 'border-slate-200 bg-slate-50/50'
+            }`}
+        >
+            <div className="p-4">
+                <div className="flex items-start gap-3">
+                    {/* Icon */}
+                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
+                        isUploaded 
+                            ? 'bg-emerald-500 text-white' 
+                            : config.is_mandatory
+                                ? 'bg-amber-100 text-amber-600'
+                                : 'bg-slate-100 text-slate-400'
+                    }`}>
+                        <FileIcon className="w-6 h-6" />
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                            <h5 className="font-medium text-slate-800 truncate">
+                                {config.title}
+                            </h5>
+                            {config.is_mandatory && (
+                                <Badge variant="outline" className="text-xs bg-amber-100 text-amber-700 border-amber-200 shrink-0">
+                                    الزامی
+                                </Badge>
+                            )}
+                            {isUploaded && (
+                                <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 text-xs shrink-0">
+                                    <Check className="w-3 h-3 ml-1" />
+                                    آپلود شده
+                                </Badge>
+                            )}
+                        </div>
+                        
+                        {config.description && (
+                            <p className="text-xs text-slate-500 mb-2">{config.description}</p>
+                        )}
+
+                        {/* File Info */}
+                        <div className="flex flex-wrap gap-2 text-xs text-slate-400">
+                            <span>فرمت‌ها: {config.allowed_formats.join(', ')}</span>
+                            <span>•</span>
+                            <span>حداکثر: {config.max_size_mb} مگابایت</span>
+                        </div>
+
+                        {/* Uploaded File Display */}
+                        {isUploaded && documentFile && (
+                            <div className="mt-3 flex items-center gap-2 bg-white p-2 rounded-lg border border-emerald-100">
+                                <FileText className="w-4 h-4 text-emerald-600 shrink-0" />
+                                <span className="text-sm text-slate-700 truncate flex-1">
+                                    {documentFile.split('/').pop()}
+                                </span>
+                                <a
+                                    href={documentFile}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="p-1.5 hover:bg-emerald-100 rounded-lg transition-colors shrink-0"
+                                    title="دانلود"
+                                >
+                                    <Download className="w-4 h-4 text-emerald-600" />
+                                </a>
+                                {canEdit && (
+                                    <button
+                                        onClick={() => onDelete(documentId)}
+                                        className="p-1.5 hover:bg-red-100 rounded-lg transition-colors shrink-0"
+                                        title="حذف"
+                                    >
+                                        <Trash2 className="w-4 h-4 text-red-500" />
+                                    </button>
+                                )}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Upload Button */}
+                    {canEdit && (
+                        <div className="shrink-0">
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept={config.allowed_formats.map(f => `.${f}`).join(',')}
+                                onChange={handleFileSelect}
+                                className="hidden"
+                            />
+                            <Button
+                                size="sm"
+                                variant={isUploaded ? "outline" : "default"}
+                                onClick={() => fileInputRef.current?.click()}
+                                disabled={isUploading}
+                                className={isUploaded 
+                                    ? "border-emerald-300 text-emerald-700 hover:bg-emerald-50" 
+                                    : "bg-gradient-to-l from-blue-500 to-blue-600"
+                                }
+                            >
+                                {isUploading ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <>
+                                        <Upload className="w-4 h-4 ml-1" />
+                                        {isUploaded ? "جایگزینی" : "آپلود"}
+                                    </>
+                                )}
+                            </Button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </motion.div>
+    );
+}
+
 export default function RequestDetail() {
     const { id } = useParams();
     const navigate = useNavigate();
@@ -77,7 +232,7 @@ export default function RequestDetail() {
     const [showActionModal, setShowActionModal] = useState(null); // 'reject' | 'revision' | null
     const [actionNotes, setActionNotes] = useState("");
     const [rejectionReason, setRejectionReason] = useState("");
-    const [uploadingFile, setUploadingFile] = useState(false);
+    const [uploadingConfigId, setUploadingConfigId] = useState(null);
     const [fileDescription, setFileDescription] = useState("");
 
     // Fetch request detail
@@ -156,16 +311,20 @@ export default function RequestDetail() {
 
     // Upload document mutation
     const uploadMutation = useMutation({
-        mutationFn: async ({ requestId, activityId, file, description }) => {
-            return await apiService.entities.FinancingRequest.uploadDocument(requestId, activityId, file, description);
+        mutationFn: async ({ requestId, activityId, file, description, documentConfigId }) => {
+            return await apiService.entities.FinancingRequest.uploadDocument(
+                requestId, activityId, file, description, documentConfigId
+            );
         },
         onSuccess: () => {
             queryClient.invalidateQueries(["financing-request", id]);
             setFileDescription("");
+            setUploadingConfigId(null);
             setSuccessMessage("فایل با موفقیت آپلود شد");
             setTimeout(() => setSuccessMessage(null), 3000);
         },
         onError: (err) => {
+            setUploadingConfigId(null);
             setError(err.response?.data?.detail || "خطا در آپلود فایل");
         }
     });
@@ -200,23 +359,19 @@ export default function RequestDetail() {
         }
     });
 
-    const handleFileUpload = async (e, activityId) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-        
-        setUploadingFile(true);
+    // Handle file upload for a specific document config
+    const handleConfigUpload = async (configId, file, activityId) => {
+        setUploadingConfigId(configId);
         try {
             await uploadMutation.mutateAsync({
                 requestId: id,
                 activityId,
                 file,
-                description: fileDescription
+                description: null,
+                documentConfigId: configId
             });
-        } finally {
-            setUploadingFile(false);
-            if (fileInputRef.current) {
-                fileInputRef.current.value = "";
-            }
+        } catch (e) {
+            // Error handled by mutation
         }
     };
 
@@ -251,6 +406,10 @@ export default function RequestDetail() {
             activityId,
             notes: actionNotes
         });
+    };
+
+    const handleDeleteDocument = (documentId) => {
+        deleteDocMutation.mutate({ requestId: id, documentId });
     };
 
     // Get current activity
@@ -491,6 +650,11 @@ export default function RequestDetail() {
                                 const isExpanded = expandedActivity === template.step_order;
                                 const canActOnThis = isCurrentStep && canAct();
 
+                                // Get document upload status from activity
+                                const docUploadStatus = activity?.document_upload_status;
+                                const hasDocConfigs = docUploadStatus?.total_configs > 0;
+                                const allMandatoryUploaded = docUploadStatus?.all_mandatory_uploaded;
+
                                 return (
                                     <motion.div
                                         key={template.id}
@@ -541,10 +705,10 @@ export default function RequestDetail() {
                                                                 <ActorIcon className="w-3 h-3" />
                                                                 {actorLabels[template.actor_role]}
                                                             </span>
-                                                            {template.requires_upload && (
+                                                            {hasDocConfigs && (
                                                                 <span className="flex items-center gap-1">
                                                                     <Upload className="w-3 h-3" />
-                                                                    نیاز به آپلود
+                                                                    {docUploadStatus.uploaded_count}/{docUploadStatus.total_configs} مدرک
                                                                 </span>
                                                             )}
                                                         </div>
@@ -594,12 +758,55 @@ export default function RequestDetail() {
                                                                 </div>
                                                             )}
 
-                                                            {/* Documents */}
-                                                            {activity?.documents?.length > 0 && (
+                                                            {/* Document Configs - Dynamic Upload Section */}
+                                                            {hasDocConfigs && (
                                                                 <div className="mb-4">
-                                                                    <h5 className="text-sm font-medium text-slate-700 mb-2">مدارک آپلود شده:</h5>
+                                                                    <div className="flex items-center justify-between mb-3">
+                                                                        <h5 className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                                                                            <FileText className="w-4 h-4" />
+                                                                            مدارک مورد نیاز
+                                                                        </h5>
+                                                                        {docUploadStatus.mandatory_count > 0 && (
+                                                                            <Badge variant="outline" className={
+                                                                                allMandatoryUploaded 
+                                                                                    ? "text-emerald-600 border-emerald-200 bg-emerald-50"
+                                                                                    : "text-amber-600 border-amber-200 bg-amber-50"
+                                                                            }>
+                                                                                {docUploadStatus.mandatory_uploaded_count}/{docUploadStatus.mandatory_count} مدرک الزامی
+                                                                            </Badge>
+                                                                        )}
+                                                                    </div>
+                                                                    <div className="space-y-3">
+                                                                        {docUploadStatus.configs.map((config) => {
+                                                                            // Find the uploaded document for this config
+                                                                            const uploadedDoc = activity?.documents?.find(
+                                                                                d => d.document_config === config.config_id
+                                                                            );
+                                                                            
+                                                                            return (
+                                                                                <DocumentUploadCard
+                                                                                    key={config.config_id}
+                                                                                    config={config}
+                                                                                    isUploaded={config.is_uploaded}
+                                                                                    documentId={config.document_id}
+                                                                                    documentFile={uploadedDoc?.file}
+                                                                                    onUpload={(configId, file) => handleConfigUpload(configId, file, activity.id)}
+                                                                                    onDelete={handleDeleteDocument}
+                                                                                    isUploading={uploadingConfigId === config.config_id}
+                                                                                    canEdit={canActOnThis && isCompany && activityStatus === "ACTION_REQUIRED"}
+                                                                                />
+                                                                            );
+                                                                        })}
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                            {/* Legacy Documents (without config) */}
+                                                            {activity?.documents?.filter(d => !d.document_config).length > 0 && (
+                                                                <div className="mb-4">
+                                                                    <h5 className="text-sm font-medium text-slate-700 mb-2">سایر مدارک:</h5>
                                                                     <div className="space-y-2">
-                                                                        {activity.documents.map((doc) => (
+                                                                        {activity.documents.filter(d => !d.document_config).map((doc) => (
                                                                             <div key={doc.id} className="flex items-center justify-between bg-slate-50 p-3 rounded-lg">
                                                                                 <div className="flex items-center gap-2">
                                                                                     <FileText className="w-4 h-4 text-slate-400" />
@@ -623,7 +830,7 @@ export default function RequestDetail() {
                                                                                     </a>
                                                                                     {canActOnThis && isCompany && (
                                                                                         <button
-                                                                                            onClick={() => deleteDocMutation.mutate({ requestId: id, documentId: doc.id })}
+                                                                                            onClick={() => handleDeleteDocument(doc.id)}
                                                                                             className="p-2 hover:bg-red-100 rounded-lg transition-colors"
                                                                                             disabled={deleteDocMutation.isPending}
                                                                                         >
@@ -640,62 +847,29 @@ export default function RequestDetail() {
                                                             {/* Action Buttons */}
                                                             {canActOnThis && (
                                                                 <div className="space-y-4">
-                                                                    {/* Upload Section for Company */}
-                                                                    {isCompany && template.requires_upload && activityStatus === "ACTION_REQUIRED" && (
-                                                                        <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                                                                            <h5 className="text-sm font-medium text-blue-700 mb-3 flex items-center gap-2">
-                                                                                <Upload className="w-4 h-4" />
-                                                                                آپلود مدرک
-                                                                            </h5>
-                                                                            <div className="space-y-3">
-                                                                                <div>
-                                                                                    <Label htmlFor="fileDescription" className="text-xs text-slate-600">توضیحات فایل (اختیاری)</Label>
-                                                                                    <Textarea
-                                                                                        id="fileDescription"
-                                                                                        value={fileDescription}
-                                                                                        onChange={(e) => setFileDescription(e.target.value)}
-                                                                                        placeholder="توضیحات مختصر درباره فایل..."
-                                                                                        rows={2}
-                                                                                        className="mt-1"
-                                                                                    />
-                                                                                </div>
-                                                                                <input
-                                                                                    ref={fileInputRef}
-                                                                                    type="file"
-                                                                                    onChange={(e) => handleFileUpload(e, activity.id)}
-                                                                                    className="hidden"
-                                                                                />
-                                                                                <Button
-                                                                                    onClick={() => fileInputRef.current?.click()}
-                                                                                    disabled={uploadingFile}
-                                                                                    variant="outline"
-                                                                                    className="w-full"
-                                                                                >
-                                                                                    {uploadingFile ? (
-                                                                                        <Loader2 className="w-4 h-4 animate-spin ml-2" />
-                                                                                    ) : (
-                                                                                        <Upload className="w-4 h-4 ml-2" />
-                                                                                    )}
-                                                                                    انتخاب و آپلود فایل
-                                                                                </Button>
-                                                                            </div>
-                                                                        </div>
-                                                                    )}
-
                                                                     {/* Submit Button for Company */}
                                                                     {isCompany && activityStatus === "ACTION_REQUIRED" && (
-                                                                        <Button
-                                                                            onClick={() => handleSubmit(activity.id)}
-                                                                            disabled={submitMutation.isPending}
-                                                                            className="w-full bg-gradient-to-l from-emerald-500 to-teal-500"
-                                                                        >
-                                                                            {submitMutation.isPending ? (
-                                                                                <Loader2 className="w-4 h-4 animate-spin ml-2" />
-                                                                            ) : (
-                                                                                <Send className="w-4 h-4 ml-2" />
+                                                                        <div>
+                                                                            {/* Warning if mandatory docs missing */}
+                                                                            {hasDocConfigs && !allMandatoryUploaded && (
+                                                                                <div className="mb-3 bg-amber-50 border border-amber-200 p-3 rounded-lg text-sm text-amber-700 flex items-center gap-2">
+                                                                                    <AlertCircle className="w-4 h-4 shrink-0" />
+                                                                                    لطفاً ابتدا تمام مدارک الزامی را آپلود کنید.
+                                                                                </div>
                                                                             )}
-                                                                            ارسال برای بررسی
-                                                                        </Button>
+                                                                            <Button
+                                                                                onClick={() => handleSubmit(activity.id)}
+                                                                                disabled={submitMutation.isPending || (hasDocConfigs && !allMandatoryUploaded)}
+                                                                                className="w-full bg-gradient-to-l from-emerald-500 to-teal-500"
+                                                                            >
+                                                                                {submitMutation.isPending ? (
+                                                                                    <Loader2 className="w-4 h-4 animate-spin ml-2" />
+                                                                                ) : (
+                                                                                    <Send className="w-4 h-4 ml-2" />
+                                                                                )}
+                                                                                ارسال برای بررسی
+                                                                            </Button>
+                                                                        </div>
                                                                     )}
 
                                                                     {/* Consultant Actions */}
@@ -855,4 +1029,3 @@ export default function RequestDetail() {
         </div>
     );
 }
-

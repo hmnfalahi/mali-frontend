@@ -173,11 +173,14 @@ export const apiService = {
                 return response.data;
             },
             // Document operations
-            uploadDocument: async (requestId, activityId, file, description = null) => {
+            uploadDocument: async (requestId, activityId, file, description = null, documentConfigId = null) => {
                 const formData = new FormData();
                 formData.append('file', file);
                 if (description) {
                     formData.append('description', description);
+                }
+                if (documentConfigId) {
+                    formData.append('document_config_id', documentConfigId);
                 }
                 const response = await api.post(
                     `/financing-requests/${requestId}/activities/${activityId}/documents/`,
