@@ -37,22 +37,57 @@ import { Label } from "@/components/ui/label";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatJalaliDate } from "@/utils/jalali";
 
-// Status config for request status
-const requestStatusConfig = {
-    "IN_PROGRESS": { label: "در حال انجام", color: "bg-blue-100 text-blue-700 border-blue-200", icon: Clock },
+// Theme colors - Dynamic based on user role
+const getThemeColors = (isConsultantView) => ({
+    // Consultant: Teal | Company: Petroleum Blue
+    primary: isConsultantView ? '#0f766e' : '#1e3a5f',
+    primaryLight: isConsultantView ? '#14b8a6' : '#2d5a8a',
+    gold: '#d4af37',
+    goldLight: '#e8c963',
+    // Gradient classes
+    headerGradient: isConsultantView 
+        ? 'from-[#0f766e] via-[#14b8a6] to-[#0f766e]' 
+        : 'from-[#1e3a5f] via-[#2d5a8a] to-[#1e3a5f]',
+    iconGradient: isConsultantView
+        ? 'from-[#0f766e] to-[#14b8a6]'
+        : 'from-[#1e3a5f] to-[#2d5a8a]',
+    stepGradient: isConsultantView
+        ? 'from-[#0f766e] to-[#14b8a6]'
+        : 'from-[#1e3a5f] to-[#2d5a8a]',
+    progressGradient: isConsultantView
+        ? 'from-[#d4af37] to-[#0f766e]'
+        : 'from-[#d4af37] to-[#1e3a5f]',
+    textAccent: isConsultantView ? 'text-teal-200' : 'text-blue-200',
+});
+
+// Status config for request status - Dynamic based on user role
+const getRequestStatusConfig = (isConsultantView) => ({
+    "IN_PROGRESS": { 
+        label: "در حال انجام", 
+        color: isConsultantView 
+            ? "bg-[#0f766e]/10 text-[#0f766e] border-[#0f766e]/30" 
+            : "bg-[#1e3a5f]/10 text-[#1e3a5f] border-[#1e3a5f]/30", 
+        icon: Clock 
+    },
     "APPROVED": { label: "تأیید شده", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
     "REJECTED": { label: "رد شده", color: "bg-red-100 text-red-700 border-red-200", icon: XCircle },
     "CANCELED": { label: "لغو شده", color: "bg-gray-100 text-gray-700 border-gray-200", icon: XCircle },
-};
+});
 
-// Status config for activity status
-const activityStatusConfig = {
+// Status config for activity status - Dynamic based on user role
+const getActivityStatusConfig = (isConsultantView) => ({
     "PENDING": { label: "در انتظار", color: "bg-slate-100 text-slate-600 border-slate-200", icon: Clock },
-    "ACTION_REQUIRED": { label: "نیاز به اقدام", color: "bg-amber-100 text-amber-700 border-amber-200", icon: AlertCircle },
-    "REVIEWING": { label: "در حال بررسی", color: "bg-purple-100 text-purple-700 border-purple-200", icon: Clock },
+    "ACTION_REQUIRED": { label: "نیاز به اقدام", color: "bg-[#d4af37]/20 text-[#b8962d] border-[#d4af37]/40", icon: AlertCircle },
+    "REVIEWING": { 
+        label: "در حال بررسی", 
+        color: isConsultantView 
+            ? "bg-[#0f766e]/10 text-[#0f766e] border-[#0f766e]/30" 
+            : "bg-[#1e3a5f]/10 text-[#1e3a5f] border-[#1e3a5f]/30", 
+        icon: Clock 
+    },
     "COMPLETED": { label: "تکمیل شده", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
     "REJECTED": { label: "رد شده", color: "bg-red-100 text-red-700 border-red-200", icon: XCircle },
-};
+});
 
 // Actor role icons
 const actorIcons = {
@@ -95,7 +130,8 @@ function DocumentUploadCard({
     isUploading,
     userRole,
     activityStatus,
-    isCurrentStep
+    isCurrentStep,
+    isConsultantView = false
 }) {
     const fileInputRef = useRef(null);
     const FileIcon = isUploaded ? getFileIcon(documentFile?.split('.').pop()) : Upload;
@@ -126,9 +162,9 @@ function DocumentUploadCard({
     const getRoleBadgeStyle = () => {
         switch (config.uploader_role) {
             case 'COMPANY':
-                return 'bg-blue-50 text-blue-600 border-blue-200';
+                return 'bg-[#1e3a5f]/10 text-[#1e3a5f] border-[#1e3a5f]/30';
             case 'CONSULTANT':
-                return 'bg-purple-50 text-purple-600 border-purple-200';
+                return 'bg-[#d4af37]/15 text-[#b8962d] border-[#d4af37]/40';
             case 'PLATFORM':
                 return 'bg-slate-50 text-slate-600 border-slate-200';
             default:
@@ -251,7 +287,9 @@ function DocumentUploadCard({
                                 disabled={isUploading}
                                 className={isUploaded 
                                     ? "border-emerald-300 text-emerald-700 hover:bg-emerald-50" 
-                                    : "bg-gradient-to-l from-blue-500 to-blue-600"
+                                    : isConsultantView
+                                        ? "bg-gradient-to-l from-[#0f766e] to-[#14b8a6]"
+                                        : "bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a]"
                                 }
                             >
                                 {isUploading ? (
@@ -489,6 +527,11 @@ export default function RequestDetail() {
         a => a.step_template_detail?.step_order === request.current_step_order
     );
 
+    // Get theme colors based on user role
+    const themeColors = getThemeColors(isConsultant || isAdmin);
+    const requestStatusConfig = getRequestStatusConfig(isConsultant || isAdmin);
+    const activityStatusConfig = getActivityStatusConfig(isConsultant || isAdmin);
+
     // Check if current user can act on current activity
     const canAct = () => {
         if (!currentActivity || !user) return false;
@@ -583,7 +626,7 @@ export default function RequestDetail() {
                 animate={{ opacity: 1, y: 0 }}
             >
                 <Card className="border-0 shadow-lg overflow-hidden">
-                    <div className="bg-gradient-to-l from-[#1e3a5f] via-[#2d5a8a] to-[#1e3a5f] p-6 text-white">
+                    <div className={`bg-gradient-to-l ${themeColors.headerGradient} p-6 text-white`}>
                         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                             <div>
                                 <div className="flex items-center gap-2 mb-2">
@@ -600,7 +643,7 @@ export default function RequestDetail() {
                                 <h1 className="text-xl md:text-2xl font-bold">
                                     {request.financing_type_detail?.title || "درخواست تأمین مالی"}
                                 </h1>
-                                <p className="text-blue-200 text-sm mt-1">
+                                <p className={`${themeColors.textAccent} text-sm mt-1`}>
                                     شناسه درخواست: {request.id} | {formatJalaliDate(request.created_at)}
                                 </p>
                             </div>
@@ -622,14 +665,14 @@ export default function RequestDetail() {
                                     {completedSteps} از {totalSteps} مرحله
                                 </span>
                             </div>
-                            <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                                            <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
                                 <motion.div
                                     initial={{ width: 0 }}
                                     animate={{ width: `${progress}%` }}
                                     transition={{ duration: 0.5, ease: "easeOut" }}
-                                    className="h-full bg-gradient-to-l from-emerald-500 to-teal-500 rounded-full"
+                                    className={`h-full bg-gradient-to-l ${themeColors.progressGradient} rounded-full`}
                                 />
-                            </div>
+                                            </div>
                         </div>
 
                         {/* Request Info */}
@@ -702,7 +745,7 @@ export default function RequestDetail() {
                 <Card className="border-0 shadow-lg">
                     <CardHeader className="border-b border-slate-100">
                         <CardTitle className="flex items-center gap-3 text-lg text-slate-800">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8a] flex items-center justify-center">
+                            <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${themeColors.iconGradient} flex items-center justify-center`}>
                                 <FileText className="w-5 h-5 text-white" />
                             </div>
                             مراحل کار
@@ -742,7 +785,7 @@ export default function RequestDetail() {
                                         <div 
                                             className={`relative rounded-2xl border-2 transition-all ${
                                                 isCurrentStep 
-                                                    ? 'border-blue-300 bg-blue-50/30 shadow-md shadow-blue-100' 
+                                                    ? 'border-[#d4af37]/50 bg-[#d4af37]/5 shadow-md shadow-[#d4af37]/20' 
                                                     : activityStatus === "COMPLETED"
                                                         ? 'border-emerald-200 bg-emerald-50/30'
                                                         : 'border-slate-100 bg-white'
@@ -755,11 +798,11 @@ export default function RequestDetail() {
                                             >
                                                 <div className="flex items-center gap-4">
                                                     {/* Step Number */}
-                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg ${
+                                                                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-lg ${
                                                         activityStatus === "COMPLETED"
                                                             ? 'bg-emerald-500 text-white'
                                                             : isCurrentStep
-                                                                ? 'bg-blue-500 text-white'
+                                                                ? `bg-gradient-to-br ${themeColors.stepGradient} text-white`
                                                                 : 'bg-slate-200 text-slate-500'
                                                     }`}>
                                                         {activityStatus === "COMPLETED" ? (
@@ -773,9 +816,9 @@ export default function RequestDetail() {
                                                     <div className="flex-1">
                                                         <div className="flex items-center gap-2 mb-1">
                                                             <h4 className="font-bold text-slate-800">{template.title}</h4>
-                                                            {isCurrentStep && (
-                                                                <Badge className="bg-blue-500 text-white text-xs">مرحله فعلی</Badge>
-                                                            )}
+                                                                    {isCurrentStep && (
+                                                                                <Badge className="bg-gradient-to-l from-[#d4af37] to-[#e8c963] text-slate-900 text-xs font-medium">مرحله فعلی</Badge>
+                                                                            )}
                                                         </div>
                                                         <div className="flex items-center gap-3 text-sm text-slate-500">
                                                             <span className="flex items-center gap-1">
@@ -869,6 +912,7 @@ export default function RequestDetail() {
                                                                                     userRole={user?.role}
                                                                                     activityStatus={activityStatus}
                                                                                     isCurrentStep={isCurrentStep}
+                                                                                    isConsultantView={isConsultant || isAdmin}
                                                                                 />
                                                                             );
                                                                         })}
@@ -935,7 +979,7 @@ export default function RequestDetail() {
                                                                             <Button
                                                                                 onClick={() => handleSubmit(activity.id)}
                                                                                 disabled={submitMutation.isPending || (hasDocConfigs && !companyDocsReady)}
-                                                                                className="w-full bg-gradient-to-l from-emerald-500 to-teal-500"
+                                                                                className={`w-full bg-gradient-to-l ${themeColors.headerGradient}`}
                                                                             >
                                                                                 {submitMutation.isPending ? (
                                                                                     <Loader2 className="w-4 h-4 animate-spin ml-2" />
@@ -972,7 +1016,7 @@ export default function RequestDetail() {
                                                                                         (template.actor_role === "CONSULTANT" && hasDocConfigs && !consultantDocsReady) ||
                                                                                         (template.actor_role === "PLATFORM" && hasDocConfigs && !platformDocsReady)
                                                                                     }
-                                                                                    className="flex-1 bg-gradient-to-l from-emerald-500 to-teal-500"
+                                                                                    className="flex-1 bg-gradient-to-l from-[#0f766e] to-[#14b8a6] hover:from-[#14b8a6] hover:to-[#0f766e]"
                                                                                 >
                                                                                     {completeMutation.isPending ? (
                                                                                         <Loader2 className="w-4 h-4 animate-spin ml-2" />
@@ -986,7 +1030,7 @@ export default function RequestDetail() {
                                                                                     <Button
                                                                                         onClick={() => setShowActionModal('revision')}
                                                                                         variant="outline"
-                                                                                        className="flex-1 text-amber-600 hover:bg-amber-50"
+                                                                                        className="flex-1 text-[#d4af37] border-[#d4af37]/40 hover:bg-[#d4af37]/10"
                                                                                     >
                                                                                         <RotateCcw className="w-4 h-4 ml-2" />
                                                                                         درخواست اصلاح

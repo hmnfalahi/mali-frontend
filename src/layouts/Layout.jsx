@@ -45,20 +45,23 @@ export default function Layout({ children, currentPageName, isConsultant = false
     };
 
     // Theme colors based on role
+    // Consultant: Teal + Gold | Company: Petroleum Blue + Gold
     const themeColors = isConsultant ? {
         gradient: "from-[#0f766e] to-[#14b8a6]",
         gradientFull: "from-[#0f766e] via-[#14b8a6] to-[#0f766e]",
-        shadow: "shadow-teal-900/20",
+        shadow: "shadow-[#0f766e]/20",
         accent: "text-teal-200",
-        bgAccent: "bg-teal-100",
-        textAccent: "text-teal-600",
+        bgAccent: "bg-[#0f766e]/10",
+        textAccent: "text-[#0f766e]",
+        gold: "#d4af37",
     } : {
         gradient: "from-[#1e3a5f] to-[#2d5a8a]",
         gradientFull: "from-[#1e3a5f] via-[#2d5a8a] to-[#1e3a5f]",
-        shadow: "shadow-blue-900/20",
-        accent: "text-blue-200",
-        bgAccent: "bg-blue-100",
-        textAccent: "text-blue-600",
+        shadow: "shadow-[#1e3a5f]/20",
+        accent: "text-[#d4af37]",
+        bgAccent: "bg-[#1e3a5f]/10",
+        textAccent: "text-[#1e3a5f]",
+        gold: "#d4af37",
     };
 
     return (
@@ -128,13 +131,13 @@ export default function Layout({ children, currentPageName, isConsultant = false
                     {/* Role Badge */}
                     {user && (
                         <div className="px-4 pt-4">
-                            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${themeColors.bgAccent}`}>
+                            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-l from-[#d4af37]/10 to-[#e8c963]/10 border border-[#d4af37]/20`}>
                                 {isConsultant ? (
-                                    <Users className={`w-4 h-4 ${themeColors.textAccent}`} />
+                                    <Users className="w-4 h-4 text-[#b8962d]" />
                                 ) : (
-                                    <Building2 className={`w-4 h-4 ${themeColors.textAccent}`} />
+                                    <Building2 className="w-4 h-4 text-[#b8962d]" />
                                 )}
-                                <span className={`text-sm font-medium ${themeColors.textAccent}`}>
+                                <span className="text-sm font-medium text-[#b8962d]">
                                     {isConsultant ? (user.role === 'ADMIN' ? 'مدیر سیستم' : 'مشاور') : 'شرکت'}
                                 </span>
                             </div>

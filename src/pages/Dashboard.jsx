@@ -23,8 +23,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { formatJalaliDate } from "@/utils/jalali";
 
+// Color constants - Company theme: Petroleum Blue + Gold
+const COLORS = {
+    primary: '#1e3a5f',
+    primaryLight: '#2d5a8a',
+    gold: '#d4af37',
+    goldLight: '#e8c963',
+};
+
 const statusConfig = {
-    "IN_PROGRESS": { label: "در حال انجام", color: "bg-blue-100 text-blue-700 border-blue-200", icon: TrendingUp },
+    "IN_PROGRESS": { label: "در حال انجام", color: "bg-[#1e3a5f]/10 text-[#1e3a5f] border-[#1e3a5f]/30", icon: TrendingUp },
     "APPROVED": { label: "تأیید شده", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
     "REJECTED": { label: "رد شده", color: "bg-red-100 text-red-700 border-red-200", icon: XCircle },
     "CANCELED": { label: "لغو شده", color: "bg-gray-100 text-gray-700 border-gray-200", icon: XCircle },
@@ -185,10 +193,10 @@ export default function Dashboard() {
                     transition={{ delay: 0.2 }}
                 >
                     <Card className="border-0 shadow-lg shadow-slate-200/50 h-full flex flex-col">
-                        <CardHeader className={`border-b ${isActive ? 'bg-blue-50/50 border-blue-100' : 'bg-slate-50/50 border-slate-100'}`}>
+                        <CardHeader className={`border-b ${isActive ? 'bg-[#d4af37]/10 border-[#d4af37]/30' : 'bg-slate-50/50 border-slate-100'}`}>
                             <CardTitle className="flex items-center gap-3 text-lg text-[#1e3a5f]">
-                                <div className={`w-10 h-10 rounded-xl ${isActive ? 'bg-blue-100' : 'bg-slate-200'} flex items-center justify-center`}>
-                                    <FileText className={`w-5 h-5 ${isActive ? 'text-blue-600' : 'text-slate-500'}`} />
+                                <div className={`w-10 h-10 rounded-xl ${isActive ? 'bg-gradient-to-br from-[#d4af37] to-[#e8c963]' : 'bg-slate-200'} flex items-center justify-center`}>
+                                    <FileText className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-500'}`} />
                                 </div>
                                 درخواست جاری
                             </CardTitle>

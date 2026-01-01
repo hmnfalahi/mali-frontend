@@ -36,9 +36,17 @@ import {
 import { motion, AnimatePresence } from "framer-motion";
 import { formatJalaliDate } from "@/utils/jalali";
 
+// Color constants - Company theme: Petroleum Blue + Gold
+const COLORS = {
+    primary: '#1e3a5f',
+    primaryLight: '#2d5a8a',
+    gold: '#d4af37',
+    goldLight: '#e8c963',
+};
+
 // Status configuration for request status
 const statusConfig = {
-    "IN_PROGRESS": { label: "در حال انجام", color: "bg-blue-100 text-blue-700 border-blue-200", icon: TrendingUp },
+    "IN_PROGRESS": { label: "در حال انجام", color: "bg-[#1e3a5f]/10 text-[#1e3a5f] border-[#1e3a5f]/30", icon: TrendingUp },
     "APPROVED": { label: "تأیید شده", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
     "REJECTED": { label: "رد شده", color: "bg-red-100 text-red-700 border-red-200", icon: XCircle },
     "CANCELED": { label: "لغو شده", color: "bg-gray-100 text-gray-700 border-gray-200", icon: XCircle },
@@ -47,8 +55,8 @@ const statusConfig = {
 // Activity status for showing current step status
 const activityStatusConfig = {
     "PENDING": { label: "در انتظار", color: "bg-slate-100 text-slate-600" },
-    "ACTION_REQUIRED": { label: "نیاز به اقدام شما", color: "bg-amber-100 text-amber-700" },
-    "REVIEWING": { label: "در حال بررسی", color: "bg-purple-100 text-purple-700" },
+    "ACTION_REQUIRED": { label: "نیاز به اقدام شما", color: "bg-[#d4af37]/20 text-[#b8962d]" },
+    "REVIEWING": { label: "در حال بررسی", color: "bg-[#1e3a5f]/10 text-[#1e3a5f]" },
     "COMPLETED": { label: "تکمیل شده", color: "bg-emerald-100 text-emerald-700" },
     "REJECTED": { label: "رد شده", color: "bg-red-100 text-red-700" },
 };

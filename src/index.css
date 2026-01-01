@@ -13,8 +13,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 215 52% 25%;
-    /* #1e3a5f converted roughly to hsl */
+    /* Primary: Petroleum Blue #1e3a5f */
+    --primary: 212 52% 25%;
     --primary-foreground: 210 40% 98%;
 
     --secondary: 210 40% 96.1%;
@@ -23,7 +23,8 @@
     --muted: 210 40% 96.1%;
     --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 210 40% 96.1%;
+    /* Accent: Gold #d4af37 */
+    --accent: 43 64% 52%;
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
@@ -31,9 +32,17 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 212 52% 25%;
 
     --radius: 0.5rem;
+
+    /* Custom color variables */
+    --petroleum-blue: 212 52% 25%;
+    --petroleum-blue-light: 210 46% 33%;
+    --gold: 43 64% 52%;
+    --gold-light: 43 73% 56%;
+    --teal: 173 59% 25%;
+    --teal-light: 173 58% 39%;
   }
 
   .dark {

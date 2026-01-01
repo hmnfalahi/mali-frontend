@@ -24,9 +24,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { formatJalaliDate } from "@/utils/jalali";
 
+// Color constants - Consultant theme: Teal + Gold
+const COLORS = {
+    primary: '#0f766e',
+    primaryLight: '#14b8a6',
+    gold: '#d4af37',
+    goldLight: '#e8c963',
+};
+
 // Status config for request status
 const requestStatusConfig = {
-    "IN_PROGRESS": { label: "در حال انجام", color: "bg-blue-100 text-blue-700 border-blue-200", icon: TrendingUp },
+    "IN_PROGRESS": { label: "در حال انجام", color: "bg-[#0f766e]/10 text-[#0f766e] border-[#0f766e]/30", icon: TrendingUp },
     "APPROVED": { label: "تأیید شده", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
     "REJECTED": { label: "رد شده", color: "bg-red-100 text-red-700 border-red-200", icon: XCircle },
     "CANCELED": { label: "لغو شده", color: "bg-gray-100 text-gray-700 border-gray-200", icon: XCircle },
@@ -35,8 +43,8 @@ const requestStatusConfig = {
 // Status config for activity status
 const activityStatusConfig = {
     "PENDING": { label: "در انتظار", color: "bg-slate-100 text-slate-700" },
-    "ACTION_REQUIRED": { label: "نیاز به اقدام شرکت", color: "bg-amber-100 text-amber-700" },
-    "REVIEWING": { label: "در حال بررسی شما", color: "bg-purple-100 text-purple-700" },
+    "ACTION_REQUIRED": { label: "نیاز به اقدام شرکت", color: "bg-[#d4af37]/20 text-[#b8962d]" },
+    "REVIEWING": { label: "در حال بررسی شما", color: "bg-[#0f766e]/10 text-[#0f766e]" },
     "COMPLETED": { label: "تکمیل شده", color: "bg-emerald-100 text-emerald-700" },
     "REJECTED": { label: "رد شده", color: "bg-red-100 text-red-700" },
 };
@@ -111,8 +119,8 @@ export default function ConsultantDashboard() {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                     { label: "کل درخواست‌ها", value: stats.total, icon: FileText, color: "bg-slate-100 text-slate-700" },
-                    { label: "در حال انجام", value: stats.inProgress, icon: Clock, color: "bg-blue-100 text-blue-700" },
-                    { label: "نیاز به بررسی", value: stats.needsReview, icon: AlertCircle, color: "bg-amber-100 text-amber-700" },
+                    { label: "در حال انجام", value: stats.inProgress, icon: Clock, color: "bg-[#0f766e]/10 text-[#0f766e]" },
+                    { label: "نیاز به بررسی", value: stats.needsReview, icon: AlertCircle, color: "bg-[#d4af37]/20 text-[#b8962d]" },
                     { label: "تکمیل شده", value: stats.completed, icon: CheckCircle2, color: "bg-emerald-100 text-emerald-700" },
                 ].map((stat, idx) => (
                     <motion.div
@@ -145,23 +153,23 @@ export default function ConsultantDashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
                 >
-                    <Card className="border-0 shadow-lg shadow-amber-200/30 border-amber-200/50 bg-gradient-to-br from-amber-50 to-white">
-                        <CardHeader className="border-b border-amber-100">
-                            <CardTitle className="flex items-center gap-3 text-lg text-amber-800">
-                                <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center">
-                                    <AlertCircle className="w-5 h-5 text-amber-600" />
+                    <Card className="border-0 shadow-lg shadow-[#d4af37]/20 border-[#d4af37]/30 bg-gradient-to-br from-[#d4af37]/10 to-white">
+                        <CardHeader className="border-b border-[#d4af37]/20">
+                            <CardTitle className="flex items-center gap-3 text-lg text-[#b8962d]">
+                                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#d4af37] to-[#e8c963] flex items-center justify-center">
+                                    <AlertCircle className="w-5 h-5 text-white" />
                                 </div>
                                 درخواست‌های منتظر بررسی شما
-                                <Badge className="bg-amber-500 text-white mr-2">{stats.needsReview}</Badge>
+                                <Badge className="bg-gradient-to-l from-[#d4af37] to-[#e8c963] text-slate-900 font-medium mr-2">{stats.needsReview}</Badge>
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="p-4">
                             <div className="space-y-3">
                                 {pendingReviewRequests.slice(0, 5).map((request) => (
-                                    <div key={request.id} className="flex items-center justify-between p-4 bg-white rounded-xl border border-amber-100 hover:border-amber-200 transition-colors">
+                                    <div key={request.id} className="flex items-center justify-between p-4 bg-white rounded-xl border border-[#d4af37]/20 hover:border-[#d4af37]/40 transition-colors">
                                         <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-100 to-amber-50 flex items-center justify-center">
-                                                <Building2 className="w-6 h-6 text-amber-600" />
+                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#d4af37]/20 to-[#d4af37]/5 flex items-center justify-center">
+                                                <Building2 className="w-6 h-6 text-[#b8962d]" />
                                             </div>
                                             <div>
                                                 <h4 className="font-bold text-slate-800">
@@ -176,7 +184,7 @@ export default function ConsultantDashboard() {
                                             </div>
                                         </div>
                                         <Link to={`/request/${request.id}`}>
-                                            <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white">
+                                            <Button size="sm" className="bg-gradient-to-l from-[#d4af37] to-[#e8c963] hover:from-[#e8c963] hover:to-[#d4af37] text-slate-900 font-medium">
                                                 <Eye className="w-4 h-4 ml-1" />
                                                 بررسی
                                             </Button>
@@ -195,10 +203,10 @@ export default function ConsultantDashboard() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
             >
-                <Card className="border-0 shadow-lg shadow-slate-200/50">
-                    <CardHeader className="bg-slate-50/50 border-b border-slate-100">
-                        <CardTitle className="flex items-center gap-3 text-lg text-slate-800">
-                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8a] flex items-center justify-center">
+                <Card className="border-0 shadow-lg shadow-[#0f766e]/10">
+                    <CardHeader className="bg-[#0f766e]/5 border-b border-[#0f766e]/10">
+                        <CardTitle className="flex items-center gap-3 text-lg text-[#0f766e]">
+                            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0f766e] to-[#14b8a6] flex items-center justify-center">
                                 <ClipboardList className="w-5 h-5 text-white" />
                             </div>
                             همه درخواست‌ها
