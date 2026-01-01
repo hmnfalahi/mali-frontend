@@ -76,25 +76,63 @@ const getFileIcon = (fileType) => {
     return FileText;
 };
 
-// Document Upload Card Component
+// Uploader role labels
+const uploaderRoleLabels = {
+    "COMPANY": "شرکت",
+    "CONSULTANT": "مشاور",
+    "PLATFORM": "پلتفرم",
+};
+
+// Document Upload Card Component - Handles bidirectional document flow
 function DocumentUploadCard({ 
     config, 
     isUploaded, 
     documentId, 
     documentFile,
+    fileName,
     onUpload, 
     onDelete,
     isUploading,
-    canEdit 
+    userRole,
+    activityStatus,
+    isCurrentStep
 }) {
     const fileInputRef = useRef(null);
     const FileIcon = isUploaded ? getFileIcon(documentFile?.split('.').pop()) : Upload;
+    
+    // Determine if user can upload this document
+    // User can upload if their role matches the uploader_role
+    const isUploader = (
+        (userRole === 'COMPANY' && config.uploader_role === 'COMPANY') ||
+        ((userRole === 'CONSULTANT' || userRole === 'ADMIN') && config.uploader_role === 'CONSULTANT') ||
+        (userRole === 'ADMIN' && config.uploader_role === 'PLATFORM')
+    );
+    
+    // Can edit if: current step, is uploader, and activity is in right status
+    const canEdit = isCurrentStep && isUploader && ['ACTION_REQUIRED', 'REVIEWING', 'PENDING'].includes(activityStatus);
+    
+    // Can download if file is uploaded
+    const canDownload = isUploaded && documentFile;
 
     const handleFileSelect = (e) => {
         const file = e.target.files?.[0];
         if (file) {
             onUpload(config.config_id, file);
             e.target.value = "";
+        }
+    };
+
+    // Determine the visual style based on uploader role
+    const getRoleBadgeStyle = () => {
+        switch (config.uploader_role) {
+            case 'COMPANY':
+                return 'bg-blue-50 text-blue-600 border-blue-200';
+            case 'CONSULTANT':
+                return 'bg-purple-50 text-purple-600 border-purple-200';
+            case 'PLATFORM':
+                return 'bg-slate-50 text-slate-600 border-slate-200';
+            default:
+                return 'bg-slate-50 text-slate-600 border-slate-200';
         }
     };
 
@@ -105,7 +143,7 @@ function DocumentUploadCard({
             className={`relative rounded-xl border-2 transition-all ${
                 isUploaded 
                     ? 'border-emerald-200 bg-emerald-50/50' 
-                    : config.is_mandatory
+                    : config.is_mandatory && isUploader
                         ? 'border-amber-200 bg-amber-50/50'
                         : 'border-slate-200 bg-slate-50/50'
             }`}
@@ -116,7 +154,7 @@ function DocumentUploadCard({
                     <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
                         isUploaded 
                             ? 'bg-emerald-500 text-white' 
-                            : config.is_mandatory
+                            : config.is_mandatory && isUploader
                                 ? 'bg-amber-100 text-amber-600'
                                 : 'bg-slate-100 text-slate-400'
                     }`}>
@@ -125,10 +163,14 @@ function DocumentUploadCard({
 
                     {/* Content */}
                     <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
+                        <div className="flex items-center flex-wrap gap-2 mb-1">
                             <h5 className="font-medium text-slate-800 truncate">
                                 {config.title}
                             </h5>
+                            {/* Uploader role badge */}
+                            <Badge variant="outline" className={`text-xs shrink-0 ${getRoleBadgeStyle()}`}>
+                                آپلود: {uploaderRoleLabels[config.uploader_role]}
+                            </Badge>
                             {config.is_mandatory && (
                                 <Badge variant="outline" className="text-xs bg-amber-100 text-amber-700 border-amber-200 shrink-0">
                                     الزامی
@@ -146,19 +188,29 @@ function DocumentUploadCard({
                             <p className="text-xs text-slate-500 mb-2">{config.description}</p>
                         )}
 
-                        {/* File Info */}
-                        <div className="flex flex-wrap gap-2 text-xs text-slate-400">
-                            <span>فرمت‌ها: {config.allowed_formats.join(', ')}</span>
-                            <span>•</span>
-                            <span>حداکثر: {config.max_size_mb} مگابایت</span>
-                        </div>
+                        {/* File Info - Only show for uploaders */}
+                        {isUploader && (
+                            <div className="flex flex-wrap gap-2 text-xs text-slate-400">
+                                <span>فرمت‌ها: {config.allowed_formats.join(', ')}</span>
+                                <span>•</span>
+                                <span>حداکثر: {config.max_size_mb} مگابایت</span>
+                            </div>
+                        )}
+
+                        {/* Waiting message for non-uploaders when file not uploaded */}
+                        {!isUploaded && !isUploader && (
+                            <div className="flex items-center gap-2 text-xs text-slate-400 mt-1">
+                                <Clock className="w-3 h-3" />
+                                <span>در انتظار آپلود توسط {uploaderRoleLabels[config.uploader_role]}</span>
+                            </div>
+                        )}
 
                         {/* Uploaded File Display */}
-                        {isUploaded && documentFile && (
+                        {canDownload && (
                             <div className="mt-3 flex items-center gap-2 bg-white p-2 rounded-lg border border-emerald-100">
                                 <FileText className="w-4 h-4 text-emerald-600 shrink-0" />
                                 <span className="text-sm text-slate-700 truncate flex-1">
-                                    {documentFile.split('/').pop()}
+                                    {fileName || documentFile?.split('/').pop()}
                                 </span>
                                 <a
                                     href={documentFile}
@@ -182,7 +234,7 @@ function DocumentUploadCard({
                         )}
                     </div>
 
-                    {/* Upload Button */}
+                    {/* Upload Button - Only for uploaders */}
                     {canEdit && (
                         <div className="shrink-0">
                             <input
@@ -211,6 +263,26 @@ function DocumentUploadCard({
                                     </>
                                 )}
                             </Button>
+                        </div>
+                    )}
+
+                    {/* Download button for non-uploaders when file is available */}
+                    {!isUploader && canDownload && (
+                        <div className="shrink-0">
+                            <a
+                                href={documentFile}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <Button
+                                    size="sm"
+                                    variant="outline"
+                                    className="border-emerald-300 text-emerald-700 hover:bg-emerald-50"
+                                >
+                                    <Download className="w-4 h-4 ml-1" />
+                                    دانلود
+                                </Button>
+                            </a>
                         </div>
                     )}
                 </div>
@@ -654,6 +726,11 @@ export default function RequestDetail() {
                                 const docUploadStatus = activity?.document_upload_status;
                                 const hasDocConfigs = docUploadStatus?.total_configs > 0;
                                 const allMandatoryUploaded = docUploadStatus?.all_mandatory_uploaded;
+                                
+                                // Per-role mandatory document status
+                                const companyDocsReady = docUploadStatus?.by_role?.COMPANY?.all_mandatory_uploaded ?? true;
+                                const consultantDocsReady = docUploadStatus?.by_role?.CONSULTANT?.all_mandatory_uploaded ?? true;
+                                const platformDocsReady = docUploadStatus?.by_role?.PLATFORM?.all_mandatory_uploaded ?? true;
 
                                 return (
                                     <motion.div
@@ -778,22 +855,20 @@ export default function RequestDetail() {
                                                                     </div>
                                                                     <div className="space-y-3">
                                                                         {docUploadStatus.configs.map((config) => {
-                                                                            // Find the uploaded document for this config
-                                                                            const uploadedDoc = activity?.documents?.find(
-                                                                                d => d.document_config === config.config_id
-                                                                            );
-                                                                            
                                                                             return (
                                                                                 <DocumentUploadCard
                                                                                     key={config.config_id}
                                                                                     config={config}
                                                                                     isUploaded={config.is_uploaded}
                                                                                     documentId={config.document_id}
-                                                                                    documentFile={uploadedDoc?.file}
+                                                                                    documentFile={config.file_url}
+                                                                                    fileName={config.file_name}
                                                                                     onUpload={(configId, file) => handleConfigUpload(configId, file, activity.id)}
                                                                                     onDelete={handleDeleteDocument}
                                                                                     isUploading={uploadingConfigId === config.config_id}
-                                                                                    canEdit={canActOnThis && isCompany && activityStatus === "ACTION_REQUIRED"}
+                                                                                    userRole={user?.role}
+                                                                                    activityStatus={activityStatus}
+                                                                                    isCurrentStep={isCurrentStep}
                                                                                 />
                                                                             );
                                                                         })}
@@ -850,16 +925,16 @@ export default function RequestDetail() {
                                                                     {/* Submit Button for Company */}
                                                                     {isCompany && activityStatus === "ACTION_REQUIRED" && (
                                                                         <div>
-                                                                            {/* Warning if mandatory docs missing */}
-                                                                            {hasDocConfigs && !allMandatoryUploaded && (
+                                                                            {/* Warning if mandatory company docs missing */}
+                                                                            {hasDocConfigs && !companyDocsReady && (
                                                                                 <div className="mb-3 bg-amber-50 border border-amber-200 p-3 rounded-lg text-sm text-amber-700 flex items-center gap-2">
                                                                                     <AlertCircle className="w-4 h-4 shrink-0" />
-                                                                                    لطفاً ابتدا تمام مدارک الزامی را آپلود کنید.
+                                                                                    لطفاً ابتدا مدارک الزامی خود را آپلود کنید.
                                                                                 </div>
                                                                             )}
                                                                             <Button
                                                                                 onClick={() => handleSubmit(activity.id)}
-                                                                                disabled={submitMutation.isPending || (hasDocConfigs && !allMandatoryUploaded)}
+                                                                                disabled={submitMutation.isPending || (hasDocConfigs && !companyDocsReady)}
                                                                                 className="w-full bg-gradient-to-l from-emerald-500 to-teal-500"
                                                                             >
                                                                                 {submitMutation.isPending ? (
@@ -874,38 +949,58 @@ export default function RequestDetail() {
 
                                                                     {/* Consultant Actions */}
                                                                     {(isConsultant || isAdmin) && (activityStatus === "REVIEWING" || activityStatus === "PENDING") && (
-                                                                        <div className="flex flex-col sm:flex-row gap-2">
-                                                                            <Button
-                                                                                onClick={() => handleComplete(activity.id)}
-                                                                                disabled={completeMutation.isPending}
-                                                                                className="flex-1 bg-gradient-to-l from-emerald-500 to-teal-500"
-                                                                            >
-                                                                                {completeMutation.isPending ? (
-                                                                                    <Loader2 className="w-4 h-4 animate-spin ml-2" />
-                                                                                ) : (
-                                                                                    <CheckCircle2 className="w-4 h-4 ml-2" />
-                                                                                )}
-                                                                                تأیید و تکمیل
-                                                                            </Button>
-                                                                            {/* Revision button only for COMPANY steps (when reviewing company's submission) */}
-                                                                            {template.actor_role === "COMPANY" && (
-                                                                                <Button
-                                                                                    onClick={() => setShowActionModal('revision')}
-                                                                                    variant="outline"
-                                                                                    className="flex-1 text-amber-600 hover:bg-amber-50"
-                                                                                >
-                                                                                    <RotateCcw className="w-4 h-4 ml-2" />
-                                                                                    درخواست اصلاح
-                                                                                </Button>
+                                                                        <div className="space-y-3">
+                                                                            {/* Warning if consultant needs to upload docs for CONSULTANT steps */}
+                                                                            {template.actor_role === "CONSULTANT" && hasDocConfigs && !consultantDocsReady && (
+                                                                                <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg text-sm text-amber-700 flex items-center gap-2">
+                                                                                    <AlertCircle className="w-4 h-4 shrink-0" />
+                                                                                    لطفاً ابتدا مدارک الزامی خود را آپلود کنید.
+                                                                                </div>
                                                                             )}
-                                                                            <Button
-                                                                                onClick={() => setShowActionModal('reject')}
-                                                                                variant="outline"
-                                                                                className="flex-1 text-red-600 hover:bg-red-50"
-                                                                            >
-                                                                                <XCircle className="w-4 h-4 ml-2" />
-                                                                                رد کردن
-                                                                            </Button>
+                                                                            {/* Warning if admin needs to upload docs for PLATFORM steps */}
+                                                                            {template.actor_role === "PLATFORM" && hasDocConfigs && !platformDocsReady && (
+                                                                                <div className="bg-amber-50 border border-amber-200 p-3 rounded-lg text-sm text-amber-700 flex items-center gap-2">
+                                                                                    <AlertCircle className="w-4 h-4 shrink-0" />
+                                                                                    لطفاً ابتدا مدارک الزامی پلتفرم را آپلود کنید.
+                                                                                </div>
+                                                                            )}
+                                                                            <div className="flex flex-col sm:flex-row gap-2">
+                                                                                <Button
+                                                                                    onClick={() => handleComplete(activity.id)}
+                                                                                    disabled={
+                                                                                        completeMutation.isPending || 
+                                                                                        (template.actor_role === "CONSULTANT" && hasDocConfigs && !consultantDocsReady) ||
+                                                                                        (template.actor_role === "PLATFORM" && hasDocConfigs && !platformDocsReady)
+                                                                                    }
+                                                                                    className="flex-1 bg-gradient-to-l from-emerald-500 to-teal-500"
+                                                                                >
+                                                                                    {completeMutation.isPending ? (
+                                                                                        <Loader2 className="w-4 h-4 animate-spin ml-2" />
+                                                                                    ) : (
+                                                                                        <CheckCircle2 className="w-4 h-4 ml-2" />
+                                                                                    )}
+                                                                                    تأیید و تکمیل
+                                                                                </Button>
+                                                                                {/* Revision button only for COMPANY steps (when reviewing company's submission) */}
+                                                                                {template.actor_role === "COMPANY" && (
+                                                                                    <Button
+                                                                                        onClick={() => setShowActionModal('revision')}
+                                                                                        variant="outline"
+                                                                                        className="flex-1 text-amber-600 hover:bg-amber-50"
+                                                                                    >
+                                                                                        <RotateCcw className="w-4 h-4 ml-2" />
+                                                                                        درخواست اصلاح
+                                                                                    </Button>
+                                                                                )}
+                                                                                <Button
+                                                                                    onClick={() => setShowActionModal('reject')}
+                                                                                    variant="outline"
+                                                                                    className="flex-1 text-red-600 hover:bg-red-50"
+                                                                                >
+                                                                                    <XCircle className="w-4 h-4 ml-2" />
+                                                                                    رد کردن
+                                                                                </Button>
+                                                                            </div>
                                                                         </div>
                                                                     )}
                                                                 </div>
