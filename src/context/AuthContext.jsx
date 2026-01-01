@@ -27,16 +27,21 @@ export function AuthProvider({ children }) {
                 const userData = response.data;
                 setUser(userData);
 
-                // Check if user has a company
-                try {
-                    const companies = await apiService.entities.Company.list();
-                    setHasCompany(companies.length > 0);
-                    if (companies.length > 0) {
-                        setCompanyId(companies[0].id);
+                // Only check company status for COMPANY role users
+                if (userData.role === 'COMPANY') {
+                    try {
+                        const companies = await apiService.entities.Company.list();
+                        setHasCompany(companies.length > 0);
+                        if (companies.length > 0) {
+                            setCompanyId(companies[0].id);
+                        }
+                    } catch (err) {
+                        console.error("Failed to check company status", err);
+                        setHasCompany(false);
                     }
-                } catch (err) {
-                    console.error("Failed to check company status", err);
-                    setHasCompany(false);
+                } else {
+                    // Consultants and Admins don't need company check
+                    setHasCompany(true);
                 }
 
             } catch (error) {
@@ -59,10 +64,15 @@ export function AuthProvider({ children }) {
             const userData = userResp.data;
             setUser(userData);
             
-            const companies = await apiService.entities.Company.list();
-            setHasCompany(companies.length > 0);
-            if (companies.length > 0) {
-                setCompanyId(companies[0].id);
+            // Only check company for COMPANY role users
+            if (userData.role === 'COMPANY') {
+                const companies = await apiService.entities.Company.list();
+                setHasCompany(companies.length > 0);
+                if (companies.length > 0) {
+                    setCompanyId(companies[0].id);
+                }
+            } else {
+                setHasCompany(true);
             }
         } catch (e) {
             setUser({ phone_number });
@@ -115,6 +125,10 @@ export function AuthProvider({ children }) {
     // Method to update company status (called after creating company)
     const checkCompanyStatus = async () => {
         if (!user) return;
+        if (user.role !== 'COMPANY') {
+            setHasCompany(true);
+            return;
+        }
         try {
             const companies = await apiService.entities.Company.list();
             setHasCompany(companies.length > 0);
@@ -141,6 +155,19 @@ export function AuthProvider({ children }) {
         setUser(prev => ({ ...prev, ...data }));
     };
 
+    // Helper to check user role
+    const isConsultant = user?.role === 'CONSULTANT';
+    const isAdmin = user?.role === 'ADMIN';
+    const isCompany = user?.role === 'COMPANY';
+
+    // Get the default dashboard path based on role
+    const getDefaultDashboard = () => {
+        if (isConsultant || isAdmin) {
+            return '/consultant-dashboard';
+        }
+        return '/dashboard';
+    };
+
     return (
         <AuthContext.Provider value={{ 
             user, 
@@ -155,7 +182,12 @@ export function AuthProvider({ children }) {
             companyId,
             checkCompanyStatus,
             refreshUser,
-            updateUserData
+            updateUserData,
+            // Role helpers
+            isConsultant,
+            isAdmin,
+            isCompany,
+            getDefaultDashboard
         }}>
             {!loading && children}
         </AuthContext.Provider>

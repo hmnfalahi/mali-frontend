@@ -24,14 +24,10 @@ import { motion } from "framer-motion";
 import { formatJalaliDate } from "@/utils/jalali";
 
 const statusConfig = {
-    "DRAFT": { label: "پیش‌نویس", color: "bg-slate-100 text-slate-700 border-slate-200", icon: Clock },
-    "PENDING": { label: "در انتظار بررسی", color: "bg-amber-100 text-amber-700 border-amber-200", icon: Clock },
-    "UNDER_REVIEW": { label: "در حال بررسی", color: "bg-blue-100 text-blue-700 border-blue-200", icon: TrendingUp },
+    "IN_PROGRESS": { label: "در حال انجام", color: "bg-blue-100 text-blue-700 border-blue-200", icon: TrendingUp },
     "APPROVED": { label: "تأیید شده", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
     "REJECTED": { label: "رد شده", color: "bg-red-100 text-red-700 border-red-200", icon: XCircle },
-    "ADDITIONAL_INFO_REQUIRED": { label: "نیاز به اصلاح", color: "bg-orange-100 text-orange-700 border-orange-200", icon: AlertCircle },
-    "COMPLETED": { label: "تکمیل شده", color: "bg-green-100 text-green-700 border-green-200", icon: CheckCircle2 },
-    "CANCELLED": { label: "لغو شده", color: "bg-gray-100 text-gray-700 border-gray-200", icon: XCircle },
+    "CANCELED": { label: "لغو شده", color: "bg-gray-100 text-gray-700 border-gray-200", icon: XCircle },
 };
 
 export default function Dashboard() {
@@ -56,11 +52,9 @@ export default function Dashboard() {
         enabled: !!user,
     });
 
-    // Determine Active Request (Most recent one that is not Rejected/Approved if we want to be strict, or just the latest one)
-    // Based on user query "we allow only 1 active request", we assume the top one is the active one if exists.
-    // If the latest one is rejected/approved, then maybe there is no active request.
-    const activeRequest = requests.length > 0 ? requests[0] : null;
-    const isActive = activeRequest && activeRequest.status !== "REJECTED" && activeRequest.status !== "APPROVED" && activeRequest.status !== "COMPLETED" && activeRequest.status !== "CANCELLED";
+    // Determine Active Request - Find the first IN_PROGRESS request
+    const activeRequest = requests.find(r => r.status === "IN_PROGRESS") || (requests.length > 0 ? requests[0] : null);
+    const isActive = activeRequest && activeRequest.status === "IN_PROGRESS";
 
     if (!user) {
         return (
@@ -227,16 +221,16 @@ export default function Dashboard() {
                                                     {formatJalaliDate(activeRequest.created_at)}
                                                 </span>
                                             </div>
-                                            <div className="pt-2 border-t border-slate-200">
-                                                <p className="text-sm text-slate-500 mb-1">نوع درخواست:</p>
-                                                <p className="font-medium text-[#1e3a5f]">
-                                                    درخواست تأمین مالی
-                                                </p>
-                                            </div>
+                                                            <div className="pt-2 border-t border-slate-200">
+                                                                <p className="text-sm text-slate-500 mb-1">نوع درخواست:</p>
+                                                                <p className="font-medium text-[#1e3a5f]">
+                                                                    {activeRequest.financing_type_detail?.title || "درخواست تأمین مالی"}
+                                                                </p>
+                                                            </div>
                                         </div>
                                     </div>
 
-                                    <Link to={createPageUrl("MyRequests")}>
+                                    <Link to={`/request/${activeRequest.id}`}>
                                         <Button variant="outline" className="w-full">
                                             مشاهده جزئیات
                                         </Button>
@@ -276,17 +270,17 @@ export default function Dashboard() {
                         {requests.slice(1, 4).map((request, idx) => (
                             <div key={request.id} className={`flex items-center justify-between p-4 ${idx !== requests.slice(1, 4).length - 1 ? 'border-b border-slate-100' : ''}`}>
                                 <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${request.status === 'APPROVED' || request.status === 'COMPLETED' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
-                                        {request.status === 'APPROVED' || request.status === 'COMPLETED' ? <CheckCircle2 className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
-                                    </div>
-                                    <div>
-                                        <p className="text-sm font-medium text-slate-800">
-                                            درخواست تأمین مالی
-                                        </p>
-                                        <p className="text-xs text-slate-500">
-                                            {formatJalaliDate(request.created_at)}
-                                        </p>
-                                    </div>
+                                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${request.status === 'APPROVED' ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-500'}`}>
+                                                        {request.status === 'APPROVED' ? <CheckCircle2 className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-sm font-medium text-slate-800">
+                                                            {request.financing_type_detail?.title || "درخواست تأمین مالی"}
+                                                        </p>
+                                                        <p className="text-xs text-slate-500">
+                                                            {formatJalaliDate(request.created_at)}
+                                                        </p>
+                                                    </div>
                                 </div>
                                 <div className="text-left">
                                     <p className="text-sm font-bold text-slate-700">

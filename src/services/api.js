@@ -10,7 +10,6 @@ const publicApi = axios.create({
 export const apiService = {
     auth: {
         me: async () => {
-            // This is now redundant if we use AuthContext, but kept for compatibility or direct usage
             const response = await api.get("/users/me/");
             return response.data;
         },
@@ -103,11 +102,6 @@ export const apiService = {
                 return response.data;
             },
             update: async (id, data) => {
-                // Defaulting to PATCH for flexibility as per common frontend patterns, 
-                // but we can expose PUT if needed. 
-                // The doc says PUT for Full Update, PATCH for Partial.
-                // Usually frontend forms send what they have. 
-                // If the caller wants PUT, they can use updateFull.
                 const response = await api.patch(`/companies/${id}/`, data);
                 return response.data;
             },
@@ -119,9 +113,7 @@ export const apiService = {
                 await api.delete(`/companies/${id}/`);
             },
             filter: async (query) => {
-                // Mapping filter query to query params
                 const params = new URLSearchParams(query).toString();
-                // Assumes endpoint /companies/?created_by=... exists
                 const response = await api.get(`/companies/?${params}`);
                 return response.data;
             }
@@ -134,28 +126,93 @@ export const apiService = {
                 const response = await api.get(`/financing-requests/?${params.toString()}`);
                 return response.data;
             },
-            // Main endpoints (per API docs: Base URL /api/financing-requests/)
+            // Main endpoints
             list: async () => {
                 const response = await api.get("/financing-requests/");
                 return response.data;
             },
             create: async (data) => {
-                const response = await api.post("/financing-requests/", data);
+                const response = await api.post("/financing-requests/create/", data);
                 return response.data;
             },
             get: async (id) => {
                 const response = await api.get(`/financing-requests/${id}/`);
                 return response.data;
             },
-            update: async (id, data) => {
-                const response = await api.patch(`/financing-requests/${id}/`, data);
+            cancel: async (id) => {
+                const response = await api.post(`/financing-requests/${id}/cancel/`);
                 return response.data;
             },
-            delete: async (id) => {
-                await api.delete(`/financing-requests/${id}/`);
+            // Activity actions
+            submitActivity: async (requestId, activityId, metaData = null) => {
+                const response = await api.post(
+                    `/financing-requests/${requestId}/activities/${activityId}/submit/`,
+                    metaData ? { meta_data: metaData } : {}
+                );
+                return response.data;
             },
-            submit: async (id) => {
-                const response = await api.post(`/financing-requests/${id}/submit/`);
+            completeActivity: async (requestId, activityId, metaData = null) => {
+                const response = await api.post(
+                    `/financing-requests/${requestId}/activities/${activityId}/complete/`,
+                    metaData ? { meta_data: metaData } : {}
+                );
+                return response.data;
+            },
+            rejectActivity: async (requestId, activityId, reason, adminNotes = null) => {
+                const response = await api.post(
+                    `/financing-requests/${requestId}/activities/${activityId}/reject/`,
+                    { reason, admin_notes: adminNotes }
+                );
+                return response.data;
+            },
+            revisionActivity: async (requestId, activityId, adminNotes) => {
+                const response = await api.post(
+                    `/financing-requests/${requestId}/activities/${activityId}/revision/`,
+                    { admin_notes: adminNotes }
+                );
+                return response.data;
+            },
+            // Document operations
+            uploadDocument: async (requestId, activityId, file, description = null) => {
+                const formData = new FormData();
+                formData.append('file', file);
+                if (description) {
+                    formData.append('description', description);
+                }
+                const response = await api.post(
+                    `/financing-requests/${requestId}/activities/${activityId}/documents/`,
+                    formData,
+                    {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    }
+                );
+                return response.data;
+            },
+            deleteDocument: async (requestId, documentId) => {
+                await api.delete(`/financing-requests/${requestId}/documents/${documentId}/`);
+            },
+            // Admin endpoints
+            assignConsultant: async (requestId, consultantId) => {
+                const response = await api.post(
+                    `/financing-requests/${requestId}/assign-consultant/`,
+                    { consultant_id: consultantId }
+                );
+                return response.data;
+            },
+            getPendingForRole: async (role) => {
+                const response = await api.get(`/financing-requests/pending/${role}/`);
+                return response.data;
+            }
+        },
+        FinancingType: {
+            list: async () => {
+                const response = await publicApi.get("/financing-requests/types/");
+                return response.data;
+            },
+            get: async (slug) => {
+                const response = await publicApi.get(`/financing-requests/types/${slug}/`);
                 return response.data;
             }
         }

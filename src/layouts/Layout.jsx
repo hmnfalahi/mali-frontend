@@ -10,14 +10,16 @@ import {
     X,
     LogOut,
     User,
-    ChevronLeft
+    ChevronLeft,
+    Users,
+    ClipboardList
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 
-export default function Layout({ children, currentPageName }) {
+export default function Layout({ children, currentPageName, isConsultant = false }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const { user, logout } = useAuth(); // Replaced local state and useEffect with useAuth hook
+    const { user, logout } = useAuth();
     const location = useLocation();
 
     // Landing page doesn't need layout
@@ -25,16 +27,38 @@ export default function Layout({ children, currentPageName }) {
         return children;
     }
 
-    const navigation = [
+    // Navigation items based on role
+    const companyNavigation = [
         { name: "داشبورد", href: createPageUrl("Dashboard"), icon: LayoutDashboard },
         { name: "اطلاعات شرکت", href: createPageUrl("CompanyProfile"), icon: Building2 },
         { name: "درخواست‌های من", href: createPageUrl("MyRequests"), icon: FileText },
     ];
 
+    const consultantNavigation = [
+        { name: "داشبورد", href: createPageUrl("ConsultantDashboard"), icon: LayoutDashboard },
+    ];
+
+    const navigation = isConsultant ? consultantNavigation : companyNavigation;
+
     const isActive = (href) => {
-        // createPageUrl returns path like "/dashboard", location.pathname is "/dashboard"
-        // Use simple string comparison or check if href is included in pathname
         return location.pathname === href;
+    };
+
+    // Theme colors based on role
+    const themeColors = isConsultant ? {
+        gradient: "from-[#0f766e] to-[#14b8a6]",
+        gradientFull: "from-[#0f766e] via-[#14b8a6] to-[#0f766e]",
+        shadow: "shadow-teal-900/20",
+        accent: "text-teal-200",
+        bgAccent: "bg-teal-100",
+        textAccent: "text-teal-600",
+    } : {
+        gradient: "from-[#1e3a5f] to-[#2d5a8a]",
+        gradientFull: "from-[#1e3a5f] via-[#2d5a8a] to-[#1e3a5f]",
+        shadow: "shadow-blue-900/20",
+        accent: "text-blue-200",
+        bgAccent: "bg-blue-100",
+        textAccent: "text-blue-600",
     };
 
     return (
@@ -49,8 +73,8 @@ export default function Layout({ children, currentPageName }) {
                     >
                         <Menu className="h-6 w-6 text-slate-700" />
                     </Button>
-                    <h1 className="text-lg font-bold bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] bg-clip-text text-transparent">
-                        پلتفرم هوشمند تأمین مالی
+                    <h1 className={`text-lg font-bold bg-gradient-to-l ${themeColors.gradient} bg-clip-text text-transparent`}>
+                        {isConsultant ? "پنل مشاور" : "پلتفرم هوشمند تأمین مالی"}
                     </h1>
                     <div className="w-10" />
                 </div>
@@ -74,12 +98,20 @@ export default function Layout({ children, currentPageName }) {
                     <div className="p-6 border-b border-slate-100">
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8a] flex items-center justify-center shadow-lg shadow-blue-900/20">
-                                    <CreditCard className="w-6 h-6 text-white" />
+                                <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${themeColors.gradient} flex items-center justify-center shadow-lg ${themeColors.shadow}`}>
+                                    {isConsultant ? (
+                                        <Users className="w-6 h-6 text-white" />
+                                    ) : (
+                                        <CreditCard className="w-6 h-6 text-white" />
+                                    )}
                                 </div>
                                 <div>
-                                    <h1 className="text-sm font-bold text-[#1e3a5f]">پلتفرم هوشمند</h1>
-                                    <p className="text-xs text-slate-500">تأمین مالی و خدمات مالی</p>
+                                    <h1 className={`text-sm font-bold ${isConsultant ? 'text-teal-700' : 'text-[#1e3a5f]'}`}>
+                                        {isConsultant ? "پنل مشاور" : "پلتفرم هوشمند"}
+                                    </h1>
+                                    <p className="text-xs text-slate-500">
+                                        {isConsultant ? "مدیریت درخواست‌ها" : "تأمین مالی و خدمات مالی"}
+                                    </p>
                                 </div>
                             </div>
                             <Button
@@ -93,6 +125,22 @@ export default function Layout({ children, currentPageName }) {
                         </div>
                     </div>
 
+                    {/* Role Badge */}
+                    {user && (
+                        <div className="px-4 pt-4">
+                            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${themeColors.bgAccent}`}>
+                                {isConsultant ? (
+                                    <Users className={`w-4 h-4 ${themeColors.textAccent}`} />
+                                ) : (
+                                    <Building2 className={`w-4 h-4 ${themeColors.textAccent}`} />
+                                )}
+                                <span className={`text-sm font-medium ${themeColors.textAccent}`}>
+                                    {isConsultant ? (user.role === 'ADMIN' ? 'مدیر سیستم' : 'مشاور') : 'شرکت'}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+
                     {/* Navigation */}
                     <nav className="flex-1 p-4 space-y-1">
                         {navigation.map((item) => {
@@ -104,11 +152,11 @@ export default function Layout({ children, currentPageName }) {
                                     to={item.href}
                                     onClick={() => setSidebarOpen(false)}
                                     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${active
-                                        ? "bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] text-white shadow-lg shadow-blue-900/20"
-                                        : "text-slate-600 hover:bg-slate-100"
+                                        ? `bg-gradient-to-l ${themeColors.gradient} text-white shadow-lg ${themeColors.shadow}`
+                                        : `text-slate-600 hover:bg-slate-100`
                                         }`}
                                 >
-                                    <Icon className={`w-5 h-5 ${active ? "text-white" : "text-slate-400 group-hover:text-[#1e3a5f]"}`} />
+                                    <Icon className={`w-5 h-5 ${active ? "text-white" : `text-slate-400 group-hover:${themeColors.textAccent}`}`} />
                                     <span className="font-medium">{item.name}</span>
                                     {active && <ChevronLeft className="w-4 h-4 mr-auto" />}
                                 </Link>
@@ -127,7 +175,7 @@ export default function Layout({ children, currentPageName }) {
                                         onClick={() => setSidebarOpen(false)}
                                         className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                                             isAccountActive
-                                                ? "bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] shadow-lg shadow-blue-900/20"
+                                                ? `bg-gradient-to-l ${themeColors.gradient} shadow-lg ${themeColors.shadow}`
                                                 : "bg-slate-50 hover:bg-slate-100"
                                         }`}
                                     >

@@ -51,7 +51,12 @@ export default function Login() {
     useEffect(() => {
         if (user) {
             const returnUrl = new URLSearchParams(location.search).get("returnUrl");
-            navigate(returnUrl || "/dashboard", { replace: true });
+            if (returnUrl) {
+                navigate(returnUrl, { replace: true });
+            } else {
+                // Redirect to appropriate dashboard based on role
+                navigate("/auto-dashboard", { replace: true });
+            }
         }
     }, [user, navigate, location]);
 
@@ -114,7 +119,8 @@ export default function Login() {
         try {
             await login(normalized, password);
             const returnUrl = new URLSearchParams(location.search).get("returnUrl");
-            navigate(returnUrl || "/dashboard", { replace: true });
+            // Redirect to appropriate dashboard based on role
+            navigate(returnUrl || "/auto-dashboard", { replace: true });
         } catch (err) {
             const errorMsg = err.response?.data?.detail || 
                             err.response?.data?.message ||
@@ -209,9 +215,11 @@ export default function Login() {
             const returnUrl = new URLSearchParams(location.search).get("returnUrl");
             
             if (response.is_new_user) {
+                // New users (companies) go to company profile
                 navigate("/company-profile", { replace: true });
             } else {
-                navigate(returnUrl || "/dashboard", { replace: true });
+                // Redirect to appropriate dashboard based on role
+                navigate(returnUrl || "/auto-dashboard", { replace: true });
             }
         } catch (err) {
             const errorMsg = err.response?.data?.message || 

@@ -6,19 +6,21 @@ import Layout from './layouts/Layout'
 
 // Lazy load pages
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+const ConsultantDashboard = lazy(() => import('./pages/ConsultantDashboard'));
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
 const Signup = lazy(() => import('./pages/Signup'));
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'));
 const CompanyProfile = lazy(() => import('./pages/CompanyProfile'));
 const MyRequests = lazy(() => import('./pages/MyRequests'));
+const RequestDetail = lazy(() => import('./pages/RequestDetail'));
 const Account = lazy(() => import('./pages/Account'));
 const ChangePassword = lazy(() => import('./pages/ChangePassword'));
 
 const queryClient = new QueryClient()
 
-function ProtectedRoute({ children, requireCompany = false }) {
-  const { user, loading, hasCompany } = useAuth();
+function ProtectedRoute({ children, requireCompany = false, allowedRoles = null }) {
+  const { user, loading, hasCompany, isConsultant, isAdmin, isCompany } = useAuth();
   const location = useLocation();
 
   if (loading) {
@@ -33,31 +35,62 @@ function ProtectedRoute({ children, requireCompany = false }) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Force company creation if not present (except when already on that page)
-  // If user is logged in BUT has no company, redirect to /company-profile
-  // UNLESS we are already there to avoid loop
-  if (hasCompany === false && location.pathname !== "/company-profile") {
-    return <Navigate to="/company-profile" replace />;
+  // Check role-based access
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
+    // Redirect to appropriate dashboard based on role
+    if (isConsultant || isAdmin) {
+      return <Navigate to="/consultant-dashboard" replace />;
+    }
+    return <Navigate to="/dashboard" replace />;
   }
 
-  // If requireCompany is true (e.g. for dashboard features) and we don't have it, we redirected above.
-  // But strictly speaking:
-  // - Dashboard: Requires Company? Maybe yes, to see requests.
-  // - My Requests: Yes.
-  // - Company Profile: No (can create).
+  // Force company creation for COMPANY role users if not present (except when already on that page)
+  if (isCompany && hasCompany === false && location.pathname !== "/company-profile") {
+    return <Navigate to="/company-profile" replace />;
+  }
 
   return children;
 }
 
+// Smart redirect component that redirects to appropriate dashboard based on role
+function SmartDashboardRedirect() {
+  const { user, loading, isConsultant, isAdmin } = useAuth();
+  const location = useLocation();
+
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // Redirect based on role
+  if (isConsultant || isAdmin) {
+    return <Navigate to="/consultant-dashboard" replace />;
+  }
+
+  return <Navigate to="/dashboard" replace />;
+}
+
 function LayoutWrapper({ children }) {
   const location = useLocation();
+  const { isConsultant, isAdmin } = useAuth();
+  
   let pageName = "Dashboard";
   if (location.pathname === "/") pageName = "Landing";
   if (location.pathname === "/company-profile") pageName = "پروفایل شرکت";
   if (location.pathname === "/my-requests") pageName = "درخواست‌های من";
+  if (location.pathname === "/consultant-dashboard") pageName = "داشبورد مشاور";
+  if (location.pathname.startsWith("/request/")) pageName = "جزئیات درخواست";
+  if (location.pathname === "/account") pageName = "حساب کاربری";
 
   return (
-    <Layout currentPageName={pageName}>
+    <Layout currentPageName={pageName} isConsultant={isConsultant || isAdmin}>
       {children}
     </Layout>
   )
@@ -83,24 +116,45 @@ function App() {
               <Route path="/signup" element={<Signup />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
 
+              {/* Smart redirect to appropriate dashboard */}
+              <Route path="/auto-dashboard" element={<SmartDashboardRedirect />} />
+
+              {/* Company Dashboard - Only for COMPANY role */}
               <Route path="/dashboard" element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['COMPANY']}>
                   <LayoutWrapper><Dashboard /></LayoutWrapper>
                 </ProtectedRoute>
               } />
 
+              {/* Consultant Dashboard - Only for CONSULTANT and ADMIN roles */}
+              <Route path="/consultant-dashboard" element={
+                <ProtectedRoute allowedRoles={['CONSULTANT', 'ADMIN']}>
+                  <LayoutWrapper><ConsultantDashboard /></LayoutWrapper>
+                </ProtectedRoute>
+              } />
+
+              {/* Company Profile - Only for COMPANY role */}
               <Route path="/company-profile" element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['COMPANY']}>
                   <LayoutWrapper><CompanyProfile /></LayoutWrapper>
                 </ProtectedRoute>
               } />
 
+              {/* My Requests - Only for COMPANY role */}
               <Route path="/my-requests" element={
-                <ProtectedRoute>
+                <ProtectedRoute allowedRoles={['COMPANY']}>
                   <LayoutWrapper><MyRequests /></LayoutWrapper>
                 </ProtectedRoute>
               } />
 
+              {/* Request Detail - Available to all authenticated users */}
+              <Route path="/request/:id" element={
+                <ProtectedRoute>
+                  <LayoutWrapper><RequestDetail /></LayoutWrapper>
+                </ProtectedRoute>
+              } />
+
+              {/* Account - Available to all authenticated users */}
               <Route path="/account" element={
                 <ProtectedRoute>
                   <LayoutWrapper><Account /></LayoutWrapper>
@@ -121,3 +175,4 @@ function App() {
 }
 
 export default App
+
