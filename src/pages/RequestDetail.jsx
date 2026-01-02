@@ -36,6 +36,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatJalaliDate } from "@/utils/jalali";
+import DynamicForm from "@/components/DynamicForm";
 
 // Theme colors - Dynamic based on user role
 const getThemeColors = (isConsultantView) => ({
@@ -469,6 +470,37 @@ export default function RequestDetail() {
         }
     });
 
+    // Form data mutation
+    const formDataMutation = useMutation({
+        mutationFn: async ({ requestId, activityId, formData }) => {
+            return await apiService.entities.FinancingRequest.saveFormData(
+                requestId, activityId, formData
+            );
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(["financing-request", id]);
+            setSuccessMessage("اطلاعات فرم ذخیره شد");
+            setTimeout(() => setSuccessMessage(null), 3000);
+        },
+        onError: (err) => {
+            const detail = err.response?.data?.detail;
+            if (Array.isArray(detail)) {
+                setError(detail.join('\n'));
+            } else {
+                setError(detail || "خطا در ذخیره اطلاعات فرم");
+            }
+        }
+    });
+
+    // Handle form data save
+    const handleFormSave = async (activityId, formData) => {
+        await formDataMutation.mutateAsync({
+            requestId: id,
+            activityId,
+            formData
+        });
+    };
+
     // Handle file upload for a specific document config
     const handleConfigUpload = async (configId, file, activityId) => {
         setUploadingConfigId(configId);
@@ -775,6 +807,11 @@ export default function RequestDetail() {
                                 const consultantDocsReady = docUploadStatus?.by_role?.CONSULTANT?.all_mandatory_uploaded ?? true;
                                 const platformDocsReady = docUploadStatus?.by_role?.PLATFORM?.all_mandatory_uploaded ?? true;
 
+                                // Form field status
+                                const formFieldStatus = activity?.form_field_status;
+                                const hasFormFields = formFieldStatus?.total_fields > 0;
+                                const allFormFieldsFilled = formFieldStatus?.all_mandatory_filled ?? true;
+
                                 return (
                                     <motion.div
                                         key={template.id}
@@ -831,6 +868,12 @@ export default function RequestDetail() {
                                                                     {docUploadStatus.uploaded_count}/{docUploadStatus.total_configs} مدرک
                                                                 </span>
                                                             )}
+                                                            {hasFormFields && (
+                                                                <span className="flex items-center gap-1">
+                                                                    <FileText className="w-3 h-3" />
+                                                                    {formFieldStatus.filled_count}/{formFieldStatus.total_fields} فیلد
+                                                                </span>
+                                                            )}
                                                         </div>
                                                     </div>
 
@@ -875,6 +918,35 @@ export default function RequestDetail() {
                                                                         توضیحات مشاور:
                                                                     </p>
                                                                     <p className="text-sm text-amber-700">{activity.admin_notes}</p>
+                                                                </div>
+                                                            )}
+
+                                                            {/* Dynamic Form Section */}
+                                                            {activity?.form_field_status && activity.form_field_status.fields?.length > 0 && (
+                                                                <div className="mb-4">
+                                                                    <div className="flex items-center justify-between mb-3">
+                                                                        <h5 className="text-sm font-medium text-slate-700 flex items-center gap-2">
+                                                                            <FileText className="w-4 h-4" />
+                                                                            اطلاعات مورد نیاز
+                                                                        </h5>
+                                                                        {activity.form_field_status.mandatory_count > 0 && (
+                                                                            <Badge variant="outline" className={
+                                                                                activity.form_field_status.all_mandatory_filled 
+                                                                                    ? "text-emerald-600 border-emerald-200 bg-emerald-50"
+                                                                                    : "text-amber-600 border-amber-200 bg-amber-50"
+                                                                            }>
+                                                                                {activity.form_field_status.mandatory_filled_count}/{activity.form_field_status.mandatory_count} فیلد الزامی
+                                                                            </Badge>
+                                                                        )}
+                                                                    </div>
+                                                                    <DynamicForm
+                                                                        fields={activity.form_field_status.fields}
+                                                                        initialData={activity.form_field_status.form_data || {}}
+                                                                        onSave={(formData) => handleFormSave(activity.id, formData)}
+                                                                        isLoading={formDataMutation.isPending}
+                                                                        canEdit={canActOnThis && template.actor_role === user?.role?.replace('ADMIN', 'PLATFORM')}
+                                                                        isConsultantView={isConsultant || isAdmin}
+                                                                    />
                                                                 </div>
                                                             )}
 
@@ -976,9 +1048,16 @@ export default function RequestDetail() {
                                                                                     لطفاً ابتدا مدارک الزامی خود را آپلود کنید.
                                                                                 </div>
                                                                             )}
+                                                                            {/* Warning if mandatory form fields missing */}
+                                                                            {hasFormFields && !allFormFieldsFilled && (
+                                                                                <div className="mb-3 bg-amber-50 border border-amber-200 p-3 rounded-lg text-sm text-amber-700 flex items-center gap-2">
+                                                                                    <AlertCircle className="w-4 h-4 shrink-0" />
+                                                                                    لطفاً ابتدا فیلدهای الزامی فرم را تکمیل کنید.
+                                                                                </div>
+                                                                            )}
                                                                             <Button
                                                                                 onClick={() => handleSubmit(activity.id)}
-                                                                                disabled={submitMutation.isPending || (hasDocConfigs && !companyDocsReady)}
+                                                                                disabled={submitMutation.isPending || (hasDocConfigs && !companyDocsReady) || (hasFormFields && !allFormFieldsFilled)}
                                                                                 className={`w-full bg-gradient-to-l ${themeColors.headerGradient}`}
                                                                             >
                                                                                 {submitMutation.isPending ? (

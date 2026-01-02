@@ -196,6 +196,14 @@ export const apiService = {
             deleteDocument: async (requestId, documentId) => {
                 await api.delete(`/financing-requests/${requestId}/documents/${documentId}/`);
             },
+            // Form data operations
+            saveFormData: async (requestId, activityId, formData) => {
+                const response = await api.post(
+                    `/financing-requests/${requestId}/activities/${activityId}/form-data/`,
+                    { form_data: formData }
+                );
+                return response.data;
+            },
             // Admin endpoints
             assignConsultant: async (requestId, consultantId) => {
                 const response = await api.post(
