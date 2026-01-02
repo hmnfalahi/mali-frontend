@@ -8,6 +8,9 @@ import Layout from './layouts/Layout'
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const ConsultantDashboard = lazy(() => import('./pages/ConsultantDashboard'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const AdminRequests = lazy(() => import('./pages/admin/AdminRequests'));
+const AdminCompanies = lazy(() => import('./pages/admin/AdminCompanies'));
+const AdminFinancingTypes = lazy(() => import('./pages/admin/AdminFinancingTypes'));
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
 const Signup = lazy(() => import('./pages/Signup'));
@@ -91,14 +94,17 @@ function LayoutWrapper({ children }) {
   if (location.pathname === "/my-requests") pageName = "درخواست‌های من";
   if (location.pathname === "/consultant-dashboard") pageName = "داشبورد مشاور";
   if (location.pathname === "/admin-dashboard") pageName = "داشبورد ادمین";
+  if (location.pathname === "/admin/requests") pageName = "مدیریت درخواست‌ها";
+  if (location.pathname === "/admin/companies") pageName = "مدیریت شرکت‌ها";
+  if (location.pathname === "/admin/financing-types") pageName = "انواع تامین مالی";
   if (location.pathname.startsWith("/request/")) pageName = "جزئیات درخواست";
   if (location.pathname === "/account") pageName = "حساب کاربری";
 
-  // Determine layout theme
-  const isAdminPage = location.pathname.startsWith("/admin");
+  // Determine layout theme - admin pages use admin theme
+  const isAdminPage = location.pathname.startsWith("/admin") || isAdmin;
 
   return (
-    <Layout currentPageName={pageName} isConsultant={isConsultant || isAdmin} isAdmin={isAdminPage}>
+    <Layout currentPageName={pageName} isConsultant={isConsultant} isAdmin={isAdminPage}>
       {children}
     </Layout>
   )
@@ -145,6 +151,27 @@ function App() {
               <Route path="/admin-dashboard" element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
                   <LayoutWrapper><AdminDashboard /></LayoutWrapper>
+                </ProtectedRoute>
+              } />
+
+              {/* Admin Requests */}
+              <Route path="/admin/requests" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <LayoutWrapper><AdminRequests /></LayoutWrapper>
+                </ProtectedRoute>
+              } />
+
+              {/* Admin Companies */}
+              <Route path="/admin/companies" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <LayoutWrapper><AdminCompanies /></LayoutWrapper>
+                </ProtectedRoute>
+              } />
+
+              {/* Admin Financing Types */}
+              <Route path="/admin/financing-types" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <LayoutWrapper><AdminFinancingTypes /></LayoutWrapper>
                 </ProtectedRoute>
               } />
 

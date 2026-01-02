@@ -15,7 +15,7 @@ import {
     ClipboardList,
     Settings,
     Layers,
-    ShieldCheck
+    ShieldCheck,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
@@ -46,6 +46,9 @@ export default function Layout({ children, currentPageName, isConsultant = false
 
     const adminNavigation = [
         { name: "داشبورد", href: createPageUrl("AdminDashboard"), icon: LayoutDashboard },
+        { name: "درخواست‌ها", href: createPageUrl("AdminRequests"), icon: FileText },
+        { name: "شرکت‌ها", href: createPageUrl("AdminCompanies"), icon: Building2 },
+        { name: "انواع تامین مالی", href: createPageUrl("AdminFinancingTypes"), icon: Layers },
     ];
 
     const navigation = showAdminLayout ? adminNavigation : (isConsultant ? consultantNavigation : companyNavigation);
@@ -55,14 +58,14 @@ export default function Layout({ children, currentPageName, isConsultant = false
     };
 
     // Theme colors based on role
-    // Admin: Indigo + Gold | Consultant: Teal + Gold | Company: Petroleum Blue + Gold
+    // Admin: Royal Purple + Gold | Consultant: Teal + Gold | Company: Petroleum Blue + Gold
     const themeColors = showAdminLayout ? {
-        gradient: "from-[#4f46e5] to-[#6366f1]",
-        gradientFull: "from-[#4f46e5] via-[#6366f1] to-[#4f46e5]",
-        shadow: "shadow-[#4f46e5]/20",
-        accent: "text-indigo-200",
-        bgAccent: "bg-[#4f46e5]/10",
-        textAccent: "text-[#4f46e5]",
+        gradient: "from-[#5b21b6] to-[#7c3aed]",
+        gradientFull: "from-[#5b21b6] via-[#7c3aed] to-[#5b21b6]",
+        shadow: "shadow-[#5b21b6]/20",
+        accent: "text-purple-200",
+        bgAccent: "bg-[#5b21b6]/10",
+        textAccent: "text-[#5b21b6]",
         gold: "#d4af37",
         roleLabel: "ادمین سیستم",
         roleIcon: ShieldCheck,

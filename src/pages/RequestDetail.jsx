@@ -39,56 +39,77 @@ import { formatJalaliDate } from "@/utils/jalali";
 import DynamicForm from "@/components/DynamicForm";
 
 // Theme colors - Dynamic based on user role
-const getThemeColors = (isConsultantView) => ({
-    // Consultant: Teal | Company: Petroleum Blue
-    primary: isConsultantView ? '#0f766e' : '#1e3a5f',
-    primaryLight: isConsultantView ? '#14b8a6' : '#2d5a8a',
-    gold: '#d4af37',
-    goldLight: '#e8c963',
-    // Gradient classes
-    headerGradient: isConsultantView 
-        ? 'from-[#0f766e] via-[#14b8a6] to-[#0f766e]' 
-        : 'from-[#1e3a5f] via-[#2d5a8a] to-[#1e3a5f]',
-    iconGradient: isConsultantView
-        ? 'from-[#0f766e] to-[#14b8a6]'
-        : 'from-[#1e3a5f] to-[#2d5a8a]',
-    stepGradient: isConsultantView
-        ? 'from-[#0f766e] to-[#14b8a6]'
-        : 'from-[#1e3a5f] to-[#2d5a8a]',
-    progressGradient: isConsultantView
-        ? 'from-[#d4af37] to-[#0f766e]'
-        : 'from-[#d4af37] to-[#1e3a5f]',
-    textAccent: isConsultantView ? 'text-teal-200' : 'text-blue-200',
-});
+// Admin: Royal Purple | Consultant: Teal | Company: Petroleum Blue
+const getThemeColors = (isConsultantView, isAdminView = false) => {
+    if (isAdminView) {
+        return {
+            primary: '#5b21b6',
+            primaryLight: '#7c3aed',
+            gold: '#d4af37',
+            goldLight: '#e8c963',
+            headerGradient: 'from-[#5b21b6] via-[#7c3aed] to-[#5b21b6]',
+            iconGradient: 'from-[#5b21b6] to-[#7c3aed]',
+            stepGradient: 'from-[#5b21b6] to-[#7c3aed]',
+            progressGradient: 'from-[#d4af37] to-[#5b21b6]',
+            textAccent: 'text-purple-200',
+        };
+    }
+    if (isConsultantView) {
+        return {
+            primary: '#0f766e',
+            primaryLight: '#14b8a6',
+            gold: '#d4af37',
+            goldLight: '#e8c963',
+            headerGradient: 'from-[#0f766e] via-[#14b8a6] to-[#0f766e]',
+            iconGradient: 'from-[#0f766e] to-[#14b8a6]',
+            stepGradient: 'from-[#0f766e] to-[#14b8a6]',
+            progressGradient: 'from-[#d4af37] to-[#0f766e]',
+            textAccent: 'text-teal-200',
+        };
+    }
+    return {
+        primary: '#1e3a5f',
+        primaryLight: '#2d5a8a',
+        gold: '#d4af37',
+        goldLight: '#e8c963',
+        headerGradient: 'from-[#1e3a5f] via-[#2d5a8a] to-[#1e3a5f]',
+        iconGradient: 'from-[#1e3a5f] to-[#2d5a8a]',
+        stepGradient: 'from-[#1e3a5f] to-[#2d5a8a]',
+        progressGradient: 'from-[#d4af37] to-[#1e3a5f]',
+        textAccent: 'text-blue-200',
+    };
+};
 
 // Status config for request status - Dynamic based on user role
-const getRequestStatusConfig = (isConsultantView) => ({
-    "IN_PROGRESS": { 
-        label: "در حال انجام", 
-        color: isConsultantView 
-            ? "bg-[#0f766e]/10 text-[#0f766e] border-[#0f766e]/30" 
-            : "bg-[#1e3a5f]/10 text-[#1e3a5f] border-[#1e3a5f]/30", 
-        icon: Clock 
-    },
-    "APPROVED": { label: "تأیید شده", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
-    "REJECTED": { label: "رد شده", color: "bg-red-100 text-red-700 border-red-200", icon: XCircle },
-    "CANCELED": { label: "لغو شده", color: "bg-gray-100 text-gray-700 border-gray-200", icon: XCircle },
-});
+const getRequestStatusConfig = (isConsultantOrAdmin, isAdminView = false) => {
+    const primaryColor = isAdminView ? '#5b21b6' : (isConsultantOrAdmin ? '#0f766e' : '#1e3a5f');
+    return {
+        "IN_PROGRESS": { 
+            label: "در حال انجام", 
+            color: `bg-[${primaryColor}]/10 text-[${primaryColor}] border-[${primaryColor}]/30`, 
+            icon: Clock 
+        },
+        "APPROVED": { label: "تأیید شده", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
+        "REJECTED": { label: "رد شده", color: "bg-red-100 text-red-700 border-red-200", icon: XCircle },
+        "CANCELED": { label: "لغو شده", color: "bg-gray-100 text-gray-700 border-gray-200", icon: XCircle },
+    };
+};
 
 // Status config for activity status - Dynamic based on user role
-const getActivityStatusConfig = (isConsultantView) => ({
-    "PENDING": { label: "در انتظار", color: "bg-slate-100 text-slate-600 border-slate-200", icon: Clock },
-    "ACTION_REQUIRED": { label: "نیاز به اقدام", color: "bg-[#d4af37]/20 text-[#b8962d] border-[#d4af37]/40", icon: AlertCircle },
-    "REVIEWING": { 
-        label: "در حال بررسی", 
-        color: isConsultantView 
-            ? "bg-[#0f766e]/10 text-[#0f766e] border-[#0f766e]/30" 
-            : "bg-[#1e3a5f]/10 text-[#1e3a5f] border-[#1e3a5f]/30", 
-        icon: Clock 
-    },
-    "COMPLETED": { label: "تکمیل شده", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
-    "REJECTED": { label: "رد شده", color: "bg-red-100 text-red-700 border-red-200", icon: XCircle },
-});
+const getActivityStatusConfig = (isConsultantOrAdmin, isAdminView = false) => {
+    const primaryColor = isAdminView ? '#5b21b6' : (isConsultantOrAdmin ? '#0f766e' : '#1e3a5f');
+    return {
+        "PENDING": { label: "در انتظار", color: "bg-slate-100 text-slate-600 border-slate-200", icon: Clock },
+        "ACTION_REQUIRED": { label: "نیاز به اقدام", color: "bg-[#d4af37]/20 text-[#b8962d] border-[#d4af37]/40", icon: AlertCircle },
+        "REVIEWING": { 
+            label: "در حال بررسی", 
+            color: `bg-[${primaryColor}]/10 text-[${primaryColor}] border-[${primaryColor}]/30`, 
+            icon: Clock 
+        },
+        "COMPLETED": { label: "تکمیل شده", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: CheckCircle2 },
+        "REJECTED": { label: "رد شده", color: "bg-red-100 text-red-700 border-red-200", icon: XCircle },
+    };
+};
 
 // Actor role icons
 const actorIcons = {
@@ -132,7 +153,8 @@ function DocumentUploadCard({
     userRole,
     activityStatus,
     isCurrentStep,
-    isConsultantView = false
+    isConsultantView = false,
+    isAdminView = false
 }) {
     const fileInputRef = useRef(null);
     const FileIcon = isUploaded ? getFileIcon(documentFile?.split('.').pop()) : Upload;
@@ -288,9 +310,11 @@ function DocumentUploadCard({
                                 disabled={isUploading}
                                 className={isUploaded 
                                     ? "border-emerald-300 text-emerald-700 hover:bg-emerald-50" 
-                                    : isConsultantView
-                                        ? "bg-gradient-to-l from-[#0f766e] to-[#14b8a6]"
-                                        : "bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a]"
+                                    : isAdminView
+                                        ? "bg-gradient-to-l from-[#5b21b6] to-[#7c3aed]"
+                                        : isConsultantView
+                                            ? "bg-gradient-to-l from-[#0f766e] to-[#14b8a6]"
+                                            : "bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a]"
                                 }
                             >
                                 {isUploading ? (
@@ -560,9 +584,9 @@ export default function RequestDetail() {
     );
 
     // Get theme colors based on user role
-    const themeColors = getThemeColors(isConsultant || isAdmin);
-    const requestStatusConfig = getRequestStatusConfig(isConsultant || isAdmin);
-    const activityStatusConfig = getActivityStatusConfig(isConsultant || isAdmin);
+    const themeColors = getThemeColors(isConsultant, isAdmin);
+    const requestStatusConfig = getRequestStatusConfig(isConsultant || isAdmin, isAdmin);
+    const activityStatusConfig = getActivityStatusConfig(isConsultant || isAdmin, isAdmin);
 
     // Check if current user can act on current activity
     const canAct = () => {
@@ -984,7 +1008,8 @@ export default function RequestDetail() {
                                                                                     userRole={user?.role}
                                                                                     activityStatus={activityStatus}
                                                                                     isCurrentStep={isCurrentStep}
-                                                                                    isConsultantView={isConsultant || isAdmin}
+                                                                                    isConsultantView={isConsultant}
+                                                                                    isAdminView={isAdmin}
                                                                                 />
                                                                             );
                                                                         })}
