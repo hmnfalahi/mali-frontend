@@ -24,8 +24,20 @@ const OTP_LENGTH = 6;
 const RESEND_COOLDOWN = 60;
 
 export default function ChangePassword() {
-    const { user, sendOTP, logout } = useAuth();
+    const { user, sendOTP, logout, isAdmin, isConsultant } = useAuth();
     const navigate = useNavigate();
+    
+    // Theme colors based on role
+    const themeColors = isAdmin ? {
+        primary: "#5b21b6",
+        gradient: "from-[#5b21b6] to-[#7c3aed]",
+    } : isConsultant ? {
+        primary: "#0f766e",
+        gradient: "from-[#0f766e] to-[#14b8a6]",
+    } : {
+        primary: "#1e3a5f",
+        gradient: "from-[#1e3a5f] to-[#2d5a8a]",
+    };
 
     // Step: 'confirm' | 'reset'
     const [step, setStep] = useState("confirm");
@@ -226,9 +238,9 @@ export default function ChangePassword() {
 
             {/* Progress indicator */}
             <div className="flex items-center justify-center gap-2 mb-6">
-                <div className={`w-3 h-3 rounded-full transition-colors ${step === "confirm" ? "bg-[#1e3a5f]" : "bg-emerald-500"}`} />
-                <div className={`w-8 h-0.5 ${step === "reset" ? "bg-[#1e3a5f]" : "bg-slate-200"}`} />
-                <div className={`w-3 h-3 rounded-full transition-colors ${step === "reset" ? "bg-[#1e3a5f]" : "bg-slate-200"}`} />
+                <div className={`w-3 h-3 rounded-full transition-colors ${step === "confirm" ? `bg-[${themeColors.primary}]` : "bg-emerald-500"}`} style={step === "confirm" ? {backgroundColor: themeColors.primary} : {}} />
+                <div className={`w-8 h-0.5 ${step === "reset" ? `bg-[${themeColors.primary}]` : "bg-slate-200"}`} style={step === "reset" ? {backgroundColor: themeColors.primary} : {}} />
+                <div className={`w-3 h-3 rounded-full transition-colors ${step === "reset" ? `bg-[${themeColors.primary}]` : "bg-slate-200"}`} style={step === "reset" ? {backgroundColor: themeColors.primary} : {}} />
             </div>
 
             <Card className="border-0 shadow-xl shadow-slate-200/50">
@@ -283,7 +295,7 @@ export default function ChangePassword() {
                             <CardFooter className="flex flex-col gap-4">
                                 <Button 
                                     onClick={handleSendOTP}
-                                    className="w-full h-12 bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] text-base"
+                                    className={`w-full h-12 bg-gradient-to-l ${themeColors.gradient} text-base`}
                                     disabled={isLoading}
                                 >
                                     {isLoading ? (
@@ -371,7 +383,7 @@ export default function ChangePassword() {
                                             {countdown > 0 ? (
                                                 <p className="text-xs text-slate-500">
                                                     ارسال مجدد کد تا{" "}
-                                                    <span className="font-bold text-[#1e3a5f]">{countdown}</span>
+                                                    <span className="font-bold" style={{color: themeColors.primary}}>{countdown}</span>
                                                     {" "}ثانیه دیگر
                                                 </p>
                                             ) : (
@@ -379,7 +391,8 @@ export default function ChangePassword() {
                                                     type="button"
                                                     onClick={handleResendOTP}
                                                     disabled={isLoading}
-                                                    className="text-xs text-[#1e3a5f] hover:underline flex items-center gap-1 mx-auto"
+                                                    className="text-xs hover:underline flex items-center gap-1 mx-auto"
+                                                    style={{color: themeColors.primary}}
                                                 >
                                                     <RefreshCw className="w-3 h-3" />
                                                     ارسال مجدد کد
@@ -436,7 +449,7 @@ export default function ChangePassword() {
                                 <CardFooter className="flex flex-col gap-3">
                                     <Button 
                                         type="submit"
-                                        className="w-full h-12 bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a] text-base"
+                                        className={`w-full h-12 bg-gradient-to-l ${themeColors.gradient} text-base`}
                                         disabled={isLoading || otpCode.join("").length !== OTP_LENGTH || !newPassword || !confirmPassword}
                                     >
                                         {isLoading ? (

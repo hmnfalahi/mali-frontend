@@ -155,22 +155,6 @@ export default function Layout({ children, currentPageName, isConsultant = false
                         </div>
                     </div>
 
-                    {/* Role Badge */}
-                    {user && (
-                        <div className="px-4 pt-4">
-                            <div className={`flex items-center gap-2 px-3 py-2 rounded-lg bg-gradient-to-l from-[#d4af37]/10 to-[#e8c963]/10 border border-[#d4af37]/20`}>
-                                {isConsultant ? (
-                                    <Users className="w-4 h-4 text-[#b8962d]" />
-                                ) : (
-                                    <Building2 className="w-4 h-4 text-[#b8962d]" />
-                                )}
-                                <span className="text-sm font-medium text-[#b8962d]">
-                                    {isConsultant ? (user.role === 'ADMIN' ? 'مدیر سیستم' : 'مشاور') : 'شرکت'}
-                                </span>
-                            </div>
-                        </div>
-                    )}
-
                     {/* Navigation */}
                     <nav className="flex-1 p-4 space-y-1">
                         {navigation.map((item) => {

@@ -21,7 +21,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Link } from "react-router-dom";
 
 export default function Account() {
-    const { user, logout, updateUserData } = useAuth();
+    const { user, logout, updateUserData, isAdmin, isConsultant } = useAuth();
+    
+    // Theme colors based on role
+    const themeColors = isAdmin ? {
+        gradient: "from-[#5b21b6] via-[#7c3aed] to-[#5b21b6]",
+        shadow: "shadow-purple-900/20",
+        accent: "text-purple-100",
+        iconBg: "from-[#5b21b6] to-[#7c3aed]",
+    } : isConsultant ? {
+        gradient: "from-[#0f766e] via-[#14b8a6] to-[#0f766e]",
+        shadow: "shadow-teal-900/20",
+        accent: "text-teal-100",
+        iconBg: "from-[#0f766e] to-[#14b8a6]",
+    } : {
+        gradient: "from-[#1e3a5f] via-[#2d5a8a] to-[#1e3a5f]",
+        shadow: "shadow-blue-900/20",
+        accent: "text-blue-100",
+        iconBg: "from-[#1e3a5f] to-[#2d5a8a]",
+    };
     
     // Edit mode
     const [isEditing, setIsEditing] = useState(false);
@@ -115,7 +133,7 @@ export default function Account() {
     if (!user) {
         return (
             <div className="flex items-center justify-center min-h-[60vh]">
-                <Loader2 className="animate-spin h-12 w-12 text-[#1e3a5f]" />
+                <Loader2 className="animate-spin h-12 w-12 text-slate-600" />
             </div>
         );
     }
@@ -126,7 +144,7 @@ export default function Account() {
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="relative overflow-hidden rounded-3xl bg-gradient-to-l from-[#1e3a5f] via-[#2d5a8a] to-[#1e3a5f] p-8 text-white shadow-lg shadow-blue-900/20 mb-8"
+                className={`relative overflow-hidden rounded-3xl bg-gradient-to-l ${themeColors.gradient} p-8 text-white shadow-lg ${themeColors.shadow} mb-8`}
             >
                 <div className="absolute top-0 left-0 w-64 h-64 bg-white/10 rounded-full -translate-x-1/2 -translate-y-1/2 blur-3xl" />
                 <div className="absolute bottom-0 right-0 w-48 h-48 bg-[#d4af37]/20 rounded-full translate-x-1/4 translate-y-1/4 blur-3xl" />
@@ -134,10 +152,10 @@ export default function Account() {
                 <div className="relative z-10">
                     <div className="flex items-center gap-2 mb-2">
                         <User className="w-5 h-5 text-white/80" />
-                        <span className="text-blue-100 text-sm">پروفایل کاربری</span>
+                        <span className={`${themeColors.accent} text-sm`}>پروفایل کاربری</span>
                     </div>
                     <h1 className="text-2xl md:text-3xl font-bold mb-2">حساب کاربری</h1>
-                    <p className="text-blue-100/80 text-sm">
+                    <p className={`${themeColors.accent}/80 text-sm`}>
                         مدیریت اطلاعات شخصی و تنظیمات امنیتی
                     </p>
                 </div>
@@ -182,7 +200,7 @@ export default function Account() {
                 <CardHeader className="border-b border-slate-100">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#1e3a5f] to-[#2d5a8a] flex items-center justify-center">
+                            <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${themeColors.iconBg} flex items-center justify-center`}>
                                 <User className="w-6 h-6 text-white" />
                             </div>
                             <div>
@@ -271,7 +289,7 @@ export default function Account() {
                                 <Button
                                     onClick={handleSave}
                                     disabled={isLoading}
-                                    className="flex-1 bg-gradient-to-l from-[#1e3a5f] to-[#2d5a8a]"
+                                    className={`flex-1 bg-gradient-to-l ${themeColors.iconBg}`}
                                 >
                                     {isLoading ? (
                                         <>

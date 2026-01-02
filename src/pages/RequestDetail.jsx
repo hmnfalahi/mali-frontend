@@ -704,7 +704,7 @@ export default function RequestDetail() {
                                 </p>
                             </div>
                             <div className="flex items-center gap-3">
-                                <Badge className={`${statusInfo.color} border text-sm px-3 py-1`}>
+                                <Badge className="bg-white/20 text-white border border-white/30 text-sm px-3 py-1 backdrop-blur-sm">
                                     <StatusIcon className="w-4 h-4 ml-1" />
                                     {statusInfo.label}
                                 </Badge>
