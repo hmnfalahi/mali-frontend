@@ -9,6 +9,7 @@ export function createPageUrl(page) {
     const mapping = {
         "Dashboard": "/dashboard",
         "ConsultantDashboard": "/consultant-dashboard",
+        "AdminDashboard": "/admin-dashboard",
         "Home": "/",
         "Landing": "/",
         "CompanyProfile": "/company-profile",

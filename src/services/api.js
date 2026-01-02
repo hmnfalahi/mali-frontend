@@ -227,5 +227,105 @@ export const apiService = {
                 return response.data;
             }
         }
+    },
+    // Admin APIs
+    admin: {
+        // Dashboard stats
+        getStats: async () => {
+            const response = await api.get("/financing-requests/admin/stats/");
+            return response.data;
+        },
+        // Companies
+        getCompanies: async () => {
+            const response = await api.get("/financing-requests/admin/companies/");
+            return response.data;
+        },
+        // All requests
+        getRequests: async (status = null) => {
+            const params = status ? `?status=${status}` : '';
+            const response = await api.get(`/financing-requests/admin/requests/${params}`);
+            return response.data;
+        },
+        // Consultants
+        getConsultants: async () => {
+            const response = await api.get("/financing-requests/admin/consultants/");
+            return response.data;
+        },
+        // Financing Types
+        financingTypes: {
+            list: async () => {
+                const response = await api.get("/financing-requests/admin/financing-types/");
+                return response.data;
+            },
+            create: async (data) => {
+                const response = await api.post("/financing-requests/admin/financing-types/create/", data);
+                return response.data;
+            },
+            get: async (id) => {
+                const response = await api.get(`/financing-requests/admin/financing-types/${id}/`);
+                return response.data;
+            },
+            update: async (id, data) => {
+                const response = await api.patch(`/financing-requests/admin/financing-types/${id}/`, data);
+                return response.data;
+            },
+            delete: async (id) => {
+                await api.delete(`/financing-requests/admin/financing-types/${id}/`);
+            },
+        },
+        // Workflow Templates
+        workflowTemplates: {
+            create: async (data) => {
+                const response = await api.post("/financing-requests/admin/workflow-templates/create/", data);
+                return response.data;
+            },
+            get: async (id) => {
+                const response = await api.get(`/financing-requests/admin/workflow-templates/${id}/`);
+                return response.data;
+            },
+            update: async (id, data) => {
+                const response = await api.patch(`/financing-requests/admin/workflow-templates/${id}/`, data);
+                return response.data;
+            },
+            delete: async (id) => {
+                await api.delete(`/financing-requests/admin/workflow-templates/${id}/`);
+            },
+        },
+        // Document Configs
+        documentConfigs: {
+            create: async (data) => {
+                const response = await api.post("/financing-requests/admin/document-configs/create/", data);
+                return response.data;
+            },
+            get: async (id) => {
+                const response = await api.get(`/financing-requests/admin/document-configs/${id}/`);
+                return response.data;
+            },
+            update: async (id, data) => {
+                const response = await api.patch(`/financing-requests/admin/document-configs/${id}/`, data);
+                return response.data;
+            },
+            delete: async (id) => {
+                await api.delete(`/financing-requests/admin/document-configs/${id}/`);
+            },
+        },
+        // Form Field Configs
+        formFieldConfigs: {
+            create: async (data) => {
+                const response = await api.post("/financing-requests/admin/form-field-configs/create/", data);
+                return response.data;
+            },
+            get: async (id) => {
+                const response = await api.get(`/financing-requests/admin/form-field-configs/${id}/`);
+                return response.data;
+            },
+            update: async (id, data) => {
+                const response = await api.patch(`/financing-requests/admin/form-field-configs/${id}/`, data);
+                return response.data;
+            },
+            delete: async (id) => {
+                await api.delete(`/financing-requests/admin/form-field-configs/${id}/`);
+            },
+        },
     }
 };

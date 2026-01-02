@@ -162,7 +162,10 @@ export function AuthProvider({ children }) {
 
     // Get the default dashboard path based on role
     const getDefaultDashboard = () => {
-        if (isConsultant || isAdmin) {
+        if (isAdmin) {
+            return '/admin-dashboard';
+        }
+        if (isConsultant) {
             return '/consultant-dashboard';
         }
         return '/dashboard';

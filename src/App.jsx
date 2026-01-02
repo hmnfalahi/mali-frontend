@@ -7,6 +7,7 @@ import Layout from './layouts/Layout'
 // Lazy load pages
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const ConsultantDashboard = lazy(() => import('./pages/ConsultantDashboard'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const Home = lazy(() => import('./pages/Home'));
 const Login = lazy(() => import('./pages/Login'));
 const Signup = lazy(() => import('./pages/Signup'));
@@ -70,7 +71,10 @@ function SmartDashboardRedirect() {
   }
 
   // Redirect based on role
-  if (isConsultant || isAdmin) {
+  if (isAdmin) {
+    return <Navigate to="/admin-dashboard" replace />;
+  }
+  if (isConsultant) {
     return <Navigate to="/consultant-dashboard" replace />;
   }
 
@@ -86,11 +90,15 @@ function LayoutWrapper({ children }) {
   if (location.pathname === "/company-profile") pageName = "پروفایل شرکت";
   if (location.pathname === "/my-requests") pageName = "درخواست‌های من";
   if (location.pathname === "/consultant-dashboard") pageName = "داشبورد مشاور";
+  if (location.pathname === "/admin-dashboard") pageName = "داشبورد ادمین";
   if (location.pathname.startsWith("/request/")) pageName = "جزئیات درخواست";
   if (location.pathname === "/account") pageName = "حساب کاربری";
 
+  // Determine layout theme
+  const isAdminPage = location.pathname.startsWith("/admin");
+
   return (
-    <Layout currentPageName={pageName} isConsultant={isConsultant || isAdmin}>
+    <Layout currentPageName={pageName} isConsultant={isConsultant || isAdmin} isAdmin={isAdminPage}>
       {children}
     </Layout>
   )
@@ -126,10 +134,17 @@ function App() {
                 </ProtectedRoute>
               } />
 
-              {/* Consultant Dashboard - Only for CONSULTANT and ADMIN roles */}
+              {/* Consultant Dashboard - Only for CONSULTANT role */}
               <Route path="/consultant-dashboard" element={
-                <ProtectedRoute allowedRoles={['CONSULTANT', 'ADMIN']}>
+                <ProtectedRoute allowedRoles={['CONSULTANT']}>
                   <LayoutWrapper><ConsultantDashboard /></LayoutWrapper>
+                </ProtectedRoute>
+              } />
+
+              {/* Admin Dashboard - Only for ADMIN role */}
+              <Route path="/admin-dashboard" element={
+                <ProtectedRoute allowedRoles={['ADMIN']}>
+                  <LayoutWrapper><AdminDashboard /></LayoutWrapper>
                 </ProtectedRoute>
               } />
 

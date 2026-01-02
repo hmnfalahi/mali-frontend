@@ -12,15 +12,21 @@ import {
     User,
     ChevronLeft,
     Users,
-    ClipboardList
+    ClipboardList,
+    Settings,
+    Layers,
+    ShieldCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
 
-export default function Layout({ children, currentPageName, isConsultant = false }) {
+export default function Layout({ children, currentPageName, isConsultant = false, isAdmin = false }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
-    const { user, logout } = useAuth();
+    const { user, logout, isAdmin: userIsAdmin } = useAuth();
     const location = useLocation();
+
+    // Detect if user is admin based on route or auth context
+    const showAdminLayout = isAdmin || userIsAdmin;
 
     // Landing page doesn't need layout
     if (currentPageName === "Landing" || currentPageName === "Home") {
@@ -38,15 +44,29 @@ export default function Layout({ children, currentPageName, isConsultant = false
         { name: "داشبورد", href: createPageUrl("ConsultantDashboard"), icon: LayoutDashboard },
     ];
 
-    const navigation = isConsultant ? consultantNavigation : companyNavigation;
+    const adminNavigation = [
+        { name: "داشبورد", href: createPageUrl("AdminDashboard"), icon: LayoutDashboard },
+    ];
+
+    const navigation = showAdminLayout ? adminNavigation : (isConsultant ? consultantNavigation : companyNavigation);
 
     const isActive = (href) => {
         return location.pathname === href;
     };
 
     // Theme colors based on role
-    // Consultant: Teal + Gold | Company: Petroleum Blue + Gold
-    const themeColors = isConsultant ? {
+    // Admin: Indigo + Gold | Consultant: Teal + Gold | Company: Petroleum Blue + Gold
+    const themeColors = showAdminLayout ? {
+        gradient: "from-[#4f46e5] to-[#6366f1]",
+        gradientFull: "from-[#4f46e5] via-[#6366f1] to-[#4f46e5]",
+        shadow: "shadow-[#4f46e5]/20",
+        accent: "text-indigo-200",
+        bgAccent: "bg-[#4f46e5]/10",
+        textAccent: "text-[#4f46e5]",
+        gold: "#d4af37",
+        roleLabel: "ادمین سیستم",
+        roleIcon: ShieldCheck,
+    } : isConsultant ? {
         gradient: "from-[#0f766e] to-[#14b8a6]",
         gradientFull: "from-[#0f766e] via-[#14b8a6] to-[#0f766e]",
         shadow: "shadow-[#0f766e]/20",
@@ -54,6 +74,8 @@ export default function Layout({ children, currentPageName, isConsultant = false
         bgAccent: "bg-[#0f766e]/10",
         textAccent: "text-[#0f766e]",
         gold: "#d4af37",
+        roleLabel: "مشاور",
+        roleIcon: Users,
     } : {
         gradient: "from-[#1e3a5f] to-[#2d5a8a]",
         gradientFull: "from-[#1e3a5f] via-[#2d5a8a] to-[#1e3a5f]",
@@ -62,6 +84,8 @@ export default function Layout({ children, currentPageName, isConsultant = false
         bgAccent: "bg-[#1e3a5f]/10",
         textAccent: "text-[#1e3a5f]",
         gold: "#d4af37",
+        roleLabel: "شرکت",
+        roleIcon: Building2,
     };
 
     return (
@@ -77,7 +101,7 @@ export default function Layout({ children, currentPageName, isConsultant = false
                         <Menu className="h-6 w-6 text-slate-700" />
                     </Button>
                     <h1 className={`text-lg font-bold bg-gradient-to-l ${themeColors.gradient} bg-clip-text text-transparent`}>
-                        {isConsultant ? "پنل مشاور" : "پلتفرم هوشمند تأمین مالی"}
+                        {showAdminLayout ? "پنل مدیریت" : (isConsultant ? "پنل مشاور" : "پلتفرم هوشمند تأمین مالی")}
                     </h1>
                     <div className="w-10" />
                 </div>
