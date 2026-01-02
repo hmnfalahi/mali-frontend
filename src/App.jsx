@@ -73,14 +73,15 @@ function SmartDashboardRedirect() {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  // Redirect based on role
-  if (isAdmin) {
+  // Redirect based on role - use user.role directly for more reliability
+  if (user.role === 'ADMIN' || isAdmin) {
     return <Navigate to="/admin-dashboard" replace />;
   }
-  if (isConsultant) {
+  if (user.role === 'CONSULTANT' || isConsultant) {
     return <Navigate to="/consultant-dashboard" replace />;
   }
 
+  // Default to company dashboard
   return <Navigate to="/dashboard" replace />;
 }
 

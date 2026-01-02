@@ -24,7 +24,7 @@ const OTP_LENGTH = 6;
 const RESEND_COOLDOWN = 60; // seconds
 
 export default function Login() {
-    const { login, sendOTP, otpLogin, user } = useAuth();
+    const { login, sendOTP, otpLogin, user, isAdmin, isConsultant } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -55,7 +55,13 @@ export default function Login() {
                 navigate(returnUrl, { replace: true });
             } else {
                 // Redirect to appropriate dashboard based on role
-                navigate("/auto-dashboard", { replace: true });
+                if (user.role === 'ADMIN') {
+                    navigate("/admin-dashboard", { replace: true });
+                } else if (user.role === 'CONSULTANT') {
+                    navigate("/consultant-dashboard", { replace: true });
+                } else {
+                    navigate("/dashboard", { replace: true });
+                }
             }
         }
     }, [user, navigate, location]);
@@ -118,9 +124,8 @@ export default function Login() {
         setIsLoading(true);
         try {
             await login(normalized, password);
-            const returnUrl = new URLSearchParams(location.search).get("returnUrl");
-            // Redirect to appropriate dashboard based on role
-            navigate(returnUrl || "/auto-dashboard", { replace: true });
+            // The useEffect hook will handle the redirect when user state updates
+            // No need to navigate here - let the useEffect handle it
         } catch (err) {
             const errorMsg = err.response?.data?.detail || 
                             err.response?.data?.message ||
@@ -212,14 +217,13 @@ export default function Login() {
 
         try {
             const response = await otpLogin(phoneNumber, code);
-            const returnUrl = new URLSearchParams(location.search).get("returnUrl");
             
             if (response.is_new_user) {
                 // New users (companies) go to company profile
                 navigate("/company-profile", { replace: true });
             } else {
-                // Redirect to appropriate dashboard based on role
-                navigate(returnUrl || "/auto-dashboard", { replace: true });
+                // The useEffect hook will handle the redirect when user state updates
+                // No need to navigate here - let the useEffect handle it
             }
         } catch (err) {
             const errorMsg = err.response?.data?.message || 
