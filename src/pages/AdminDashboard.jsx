@@ -629,6 +629,8 @@ function FinancingTypesSection({ financingTypes, loading, expandedType, setExpan
     const [selectedStep, setSelectedStep] = useState(null);
     const [createDocDialogOpen, setCreateDocDialogOpen] = useState(false);
     const [createFieldDialogOpen, setCreateFieldDialogOpen] = useState(false);
+    const [metaOptionsText, setMetaOptionsText] = useState('{}');
+    const [metaOptionsError, setMetaOptionsError] = useState(false);
 
     // Create financing type form
     const [newType, setNewType] = useState({
@@ -849,6 +851,8 @@ function FinancingTypesSection({ financingTypes, loading, expandedType, setExpan
                                                                         workflow_template: step.id,
                                                                         sort_order: (step.form_field_configs?.length || 0) + 1,
                                                                     });
+                                                                    setMetaOptionsText('{}');
+                                                                    setMetaOptionsError(false);
                                                                     setCreateFieldDialogOpen(true);
                                                                 }}
                                                                 onDeleteStep={() => deleteStepMutation.mutate(step.id)}
@@ -1168,21 +1172,59 @@ function FinancingTypesSection({ financingTypes, loading, expandedType, setExpan
                         {/* Meta options for SELECT and DATA_GRID */}
                         {(newFieldConfig.field_type === 'SELECT' || newFieldConfig.field_type === 'DATA_GRID') && (
                             <div>
-                                <Label>تنظیمات پیشرفته (JSON)</Label>
+                                <Label className="flex items-center justify-between">
+                                    <span>تنظیمات پیشرفته (JSON)</span>
+                                    {metaOptionsError && (
+                                        <span className="text-xs text-red-500 flex items-center gap-1">
+                                            <AlertCircle className="w-3 h-3" />
+                                            فرمت JSON نامعتبر است
+                                        </span>
+                                    )}
+                                </Label>
                                 <Textarea
-                                    value={JSON.stringify(newFieldConfig.meta_options, null, 2)}
+                                    value={metaOptionsText}
                                     onChange={(e) => {
+                                        const text = e.target.value;
+                                        setMetaOptionsText(text);
                                         try {
-                                            setNewFieldConfig({ ...newFieldConfig, meta_options: JSON.parse(e.target.value) });
-                                        } catch { }
+                                            const parsed = JSON.parse(text);
+                                            setNewFieldConfig({ ...newFieldConfig, meta_options: parsed });
+                                            setMetaOptionsError(false);
+                                        } catch {
+                                            setMetaOptionsError(true);
+                                        }
                                     }}
                                     placeholder={newFieldConfig.field_type === 'SELECT'
                                         ? '{"options": [{"value": "1", "label": "گزینه ۱"}]}'
                                         : '{"columns": [{"key": "name", "label": "نام", "type": "text"}], "min_rows": 1}'
                                     }
-                                    className="mt-1 dir-ltr text-left font-mono text-sm"
-                                    rows={4}
+                                    className={`mt-1 dir-ltr text-left font-mono text-sm ${metaOptionsError ? 'border-red-500' : ''}`}
+                                    rows={6}
                                 />
+                                {newFieldConfig.field_type === 'DATA_GRID' && (
+                                    <div className="mt-2 text-xs text-slate-500 bg-slate-50 p-2 rounded">
+                                        <p className="font-medium mb-1">نمونه برای جدول داده:</p>
+                                        <pre className="text-xs overflow-x-auto whitespace-pre-wrap">{`{
+  "columns": [
+    {"key": "item_name", "label": "نام کالا", "type": "text", "required": true},
+    {"key": "quantity", "label": "تعداد", "type": "number", "required": true}
+  ],
+  "min_rows": 1,
+  "max_rows": 50
+}`}</pre>
+                                    </div>
+                                )}
+                                {newFieldConfig.field_type === 'SELECT' && (
+                                    <div className="mt-2 text-xs text-slate-500 bg-slate-50 p-2 rounded">
+                                        <p className="font-medium mb-1">نمونه برای فیلد انتخابی:</p>
+                                        <pre className="text-xs overflow-x-auto whitespace-pre-wrap">{`{
+  "options": [
+    {"value": "12", "label": "۱۲ ماه"},
+    {"value": "24", "label": "۲۴ ماه"}
+  ]
+}`}</pre>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
@@ -1193,7 +1235,7 @@ function FinancingTypesSection({ financingTypes, loading, expandedType, setExpan
                         <Button
                             className={`bg-gradient-to-l ${themeColors.gradient}`}
                             onClick={() => createFieldMutation.mutate(newFieldConfig)}
-                            disabled={!newFieldConfig.label || !newFieldConfig.field_key || createFieldMutation.isPending}
+                            disabled={!newFieldConfig.label || !newFieldConfig.field_key || createFieldMutation.isPending || metaOptionsError}
                         >
                             {createFieldMutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : "افزودن"}
                         </Button>
